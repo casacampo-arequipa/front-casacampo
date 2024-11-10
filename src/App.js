@@ -24,6 +24,9 @@ import CabinDetail from "./views/client/CabinDetail";
 import Navbar from "./views/client/partials/Navbar";
 import Footer from "./views/client/partials/Footer";
 import Usuarios from "./views/admin/Usuarios";
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // Tema de PrimeReact (elige el que prefieras)
+import 'primereact/resources/primereact.min.css'; // Estilos de los componentes de PrimeReact
+import 'primeicons/primeicons.css'; 
 
 function Layout({ children }) {
   const location = useLocation();
@@ -53,6 +56,7 @@ function App() {
   }, []);
 
   return (
+    
     <LanguageProvider>
       <Router>
         <div className="App">

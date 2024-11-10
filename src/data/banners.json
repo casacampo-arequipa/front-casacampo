@@ -1,27 +1,26 @@
 [
-    {
-      "id": 1,
-      "imagen": "https://via.placeholder.com/800x400?text=Banner+1",
-      "nombre": "Producto 1",
-      "tipo": "Productos"
-    },
-    {
-      "id": 2,
-      "imagen": "https://via.placeholder.com/800x400?text=Banner+2",
-      "nombre": "Producto 2",
-      "tipo": "Productos"
-    },
-    {
-      "id": 3,
-      "imagen": "https://via.placeholder.com/800x400?text=Banner+3",
-      "nombre": "Producto 3",
-      "tipo": "Productos"
-    },
-    {
-      "id": 4,
-      "imagen": "https://via.placeholder.com/800x400?text=Banner+4",
-      "nombre": "Producto 4",
-      "tipo": "Productos"
-    }
-  ]
-  
+  {
+    "id": 1,
+    "imagen": "https://via.placeholder.com/800x400?text=Banner+1",
+    "nombre": "Producto 1",
+    "tipo": "Productos"
+  },
+  {
+    "id": 2,
+    "imagen": "https://via.placeholder.com/800x400?text=Banner+2",
+    "nombre": "Producto 2",
+    "tipo": "Productos"
+  },
+  {
+    "id": 3,
+    "imagen": "https://via.placeholder.com/800x400?text=Banner+3",
+    "nombre": "Producto 3",
+    "tipo": "Productos"
+  },
+  {
+    "id": 4,
+    "imagen": "https://via.placeholder.com/800x400?text=Banner+4",
+    "nombre": "Producto 4",
+    "tipo": "Productos"
+  }
+]

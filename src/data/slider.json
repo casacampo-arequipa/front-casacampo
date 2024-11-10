@@ -1,15 +1,14 @@
 [
-    {
-      "url": "/images/casa-campo.jpg",
-      "text": "¡Casa Campo Arequipa - La mejor experiencia!"
-    },
-    {
-      "url": "/images/casa-campo_02.jpg",
-      "text": "Disfruta de momentos inolvidables"
-    },
-    {
-      "url": "/images/casa-campo_03.jpg",
-      "text": "Un lugar único para relajarse"
-    }
-  ]
-  
+  {
+    "url": "/images/casa-campo.jpg",
+    "text": "¡Vive la mejor experiencia rodeado de naturaleza!"
+  },
+  {
+    "url": "/images/casa-campo_02.jpg",
+    "text": "Disfruta de momentos inolvidables"
+  },
+  {
+    "url": "/images/casa-campo_03.jpg",
+    "text": "Un lugar único para relajarse"
+  }
+]

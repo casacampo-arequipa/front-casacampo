@@ -3,36 +3,40 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo-arequipa-remove.png"; // Ensure the path is correct
+import axios from "axios";
+import { API_URL } from "../env";
+import { getUserData, setToken } from "../helpers/auth";
+import { setUserData } from "../helpers/auth";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const nav = useNavigate();
+  const [error, setError] = useState();
+
   const navigate = useNavigate(); // Hook for navigation
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Dummy authentication function - replace with your actual authentication logic
-    const authenticateUser = async (username, password) => {
-      // Example: Make an API call to authenticate the user and get the role
-      return {
-        role: username === "admin" ? "admin" : "user", // Example role assignment
-      };
+    const data = {
+      email: e.target.email.value,
+      password: e.target.password.value,
     };
-
-    try {
-      const result = await authenticateUser(username, password);
-
-      // Redirect based on user role
-      if (result.role === "admin") {
-        navigate("/dashboard");
-      } else {
-        navigate("/"); // Assuming '/home' is your normal user page
-      }
-    } catch (error) {
-      console.error("Authentication failed", error);
-      // Handle authentication error (e.g., show an error message)
-    }
+    axios
+      .post(`${API_URL}/auth/login`, data)
+      .then((resp) => {
+        setToken(resp.data.token.access_token);
+        setUserData(resp.data.user)
+        if (getUserData().role == "Admin") {
+          console.log(getUserData().role)
+          nav("/dashboard");
+        } else {
+          nav("/");
+        }
+        
+        alert("Usuario Logeado");
+      })
+      .catch((error) => {
+        setError(error);
+      });
   };
 
   return (
@@ -48,10 +52,8 @@ const Login = () => {
               Usuario
             </label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             />
@@ -63,8 +65,6 @@ const Login = () => {
             <input
               type="password"
               id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             />

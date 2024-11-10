@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useState, useEffect } from "react";
 import { translateText } from "./translateService";
-import contentToTranslate from "../data/data.json";
+import esTranslations from "../data/data.json";
+import enTranslations from "../data/en.json";
 
 export const LanguageContext = createContext();
 
@@ -15,7 +16,47 @@ export const LanguageProvider = ({ children }) => {
   const [currentView, setCurrentView] = useState("Inicio");
 
   const getVisibleContentKeys = (currentView) => {
-    return Object.keys(contentToTranslate[currentView] || {});
+    return Object.keys(esTranslations[currentView] || {});
+  };
+
+  const translateDatabaseData = async (data, targetLang) => {
+    if (targetLang === "es") return data;
+
+    const textsToTranslate = [];
+
+    const extractTexts = (obj) => {
+      for (const key in obj) {
+        if (typeof obj[key] === "string") {
+          textsToTranslate.push(obj[key]);
+        } else if (Array.isArray(obj[key])) {
+          obj[key].forEach((item) => extractTexts(item));
+        } else if (typeof obj[key] === "object" && obj[key] !== null) {
+          extractTexts(obj[key]);
+        }
+      }
+    };
+
+    extractTexts(data);
+
+    const translatedTexts = await translateText(textsToTranslate, targetLang);
+
+    let translationIndex = 0;
+    const applyTranslations = (obj) => {
+      for (const key in obj) {
+        if (typeof obj[key] === "string") {
+          obj[key] = translatedTexts[translationIndex++];
+        } else if (Array.isArray(obj[key])) {
+          obj[key].forEach((item) => applyTranslations(item));
+        } else if (typeof obj[key] === "object" && obj[key] !== null) {
+          applyTranslations(obj[key]);
+        }
+      }
+    };
+
+    const translatedData = JSON.parse(JSON.stringify(data));
+    applyTranslations(translatedData);
+
+    return translatedData;
   };
 
   const translateContent = async (currentView) => {
@@ -26,74 +67,29 @@ export const LanguageProvider = ({ children }) => {
 
     try {
       if (language !== "es") {
-        // Traducción para otros idiomas
-        const currentViewTranslations = await Promise.all(
-          visibleKeys.map(async (key) => {
-            if (contentToTranslate[currentView] && contentToTranslate[currentView][key]) {
-              newTranslations[key] = await translateText(contentToTranslate[currentView][key], language);
-            }
-          })
-        );
-    
-        // Traducción de textos generales
-        const generalTranslations = await Promise.all(
-          Object.keys(contentToTranslate["General"]).map(async (key) => {
-            newTranslations[key] = await translateText(contentToTranslate["General"][key], language);
-          })
-        );
-    
-        setTranslations(newTranslations); // Actualiza todas las traducciones
-    
-        // Verificar si hay traducciones almacenadas
-        const storedTranslations = localStorage.getItem(`translations-${language}`);
-        if (storedTranslations) {
-          const parsedStoredTranslations = JSON.parse(storedTranslations);
-          visibleKeys.forEach((key) => {
-            if (parsedStoredTranslations[key]) {
-              newTranslations[key] = parsedStoredTranslations[key];
-            } else {
-              // Traduce el contenido si no está almacenado
-              translateText(contentToTranslate[currentView][key], language)
-                .then((translation) => {
-                  newTranslations[key] = translation;
-                  setTranslations((prev) => ({ ...prev, [key]: translation }));
-                })
-                .catch((error) => {
-                  console.warn(`No se pudo traducir ${key}: ${error.message}`);
-                  newTranslations[key] = contentToTranslate[currentView][key]; // Mantiene el texto original
-                });
-            }
-          });
-        } else {
-          // Traduce y almacena si no hay traducciones almacenadas
-          await Promise.all(
-            visibleKeys.map(async (key) => {
-              try {
-                const translation = await translateText(contentToTranslate[currentView][key], language);
-                newTranslations[key] = translation;
-                localStorage.setItem(`translations-${language}`, JSON.stringify(newTranslations));
-                setTranslations((prev) => ({ ...prev, [key]: translation }));
-              } catch (error) {
-                console.warn(`No se pudo traducir ${key}: ${error.message}`);
-                newTranslations[key] = contentToTranslate[currentView][key]; // Mantiene el texto original
-              }
-            })
-          );
-        }
-      } else {
-        // Si el idioma es español, cargar el contenido original
         visibleKeys.forEach((key) => {
-          newTranslations[key] = contentToTranslate[currentView][key]; // Cargar los textos de la vista actual en español
+          newTranslations[key] = enTranslations[currentView][key];
         });
-    
-        // Cargar también los textos generales en español
-        Object.keys(contentToTranslate["General"]).forEach((key) => {
-          if (contentToTranslate["General"][key]) {
-            newTranslations[key] = contentToTranslate["General"][key]; // Cargar textos generales
+
+        Object.keys(enTranslations["General"]).forEach((key) => {
+          if (enTranslations["General"][key]) {
+            newTranslations[key] = enTranslations["General"][key];
           }
         });
-    
-        setTranslations(newTranslations); // Actualiza las traducciones con el contenido original en español
+
+        setTranslations(newTranslations);
+      } else {
+        visibleKeys.forEach((key) => {
+          newTranslations[key] = esTranslations[currentView][key];
+        });
+
+        Object.keys(esTranslations["General"]).forEach((key) => {
+          if (esTranslations["General"][key]) {
+            newTranslations[key] = esTranslations["General"][key];
+          }
+        });
+
+        setTranslations(newTranslations);
       }
     } catch (error) {
       console.error("Error al traducir contenido:", error);
@@ -101,9 +97,8 @@ export const LanguageProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-    
-  }
-   
+  };
+
   useEffect(() => {
     translateContent(currentView);
     localStorage.setItem("language", language);
@@ -115,14 +110,14 @@ export const LanguageProvider = ({ children }) => {
       const visibleKeys = getVisibleContentKeys(currentView);
       const initialTranslations = {};
       visibleKeys.forEach((key) => {
-        initialTranslations[key] = contentToTranslate[currentView][key];
+        initialTranslations[key] = esTranslations[currentView][key];
       });
-      Object.keys(contentToTranslate["General"]).forEach((key) => {
-        if (contentToTranslate["General"][key]) {
-          initialTranslations[key] = contentToTranslate["General"][key]; // Cargar textos generales
+      Object.keys(esTranslations["General"]).forEach((key) => {
+        if (esTranslations["General"][key]) {
+          initialTranslations[key] = esTranslations["General"][key];
         }
       });
-      setTranslations(initialTranslations); // Cargar traducciones en español
+      setTranslations(initialTranslations);
     }
   }, [currentView, language]);
 
@@ -136,6 +131,7 @@ export const LanguageProvider = ({ children }) => {
         error,
         currentView,
         setCurrentView,
+        translateDatabaseData, // Exponer la función para traducir datos de la base de datos
       }}
     >
       {children}

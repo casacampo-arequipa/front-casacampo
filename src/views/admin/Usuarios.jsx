@@ -1,26 +1,17 @@
 import React, { useState, useEffect } from "react";
 
 import { Card } from "../../components/Card";
+import useFetch from "../../useFetchAdmin";
+
 
 const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage, setUsersPerPage] = useState(5);
+  const { data, loading, error } = useFetch("users-admin")
 
   useEffect(() => {
-    const fetchUsuarios = () => {
-      const dummyUsers = [
-        { id: 1, nombre: "Juan Pérez", email: "juan@example.com" },
-        { id: 2, nombre: "Ana Martínez", email: "ana@example.com" },
-        { id: 3, nombre: "Pedro García", email: "pedro@example.com" },
-        { id: 4, nombre: "Lucía Torres", email: "lucia@example.com" },
-        { id: 5, nombre: "Carlos Fernández", email: "carlos@example.com" },
-        { id: 6, nombre: "María López", email: "maria@example.com" },
-      ];
-      setUsuarios(dummyUsers);
-    };
-    fetchUsuarios();
   }, []);
 
   const filteredUsers = usuarios.filter((user) =>
@@ -48,25 +39,31 @@ const Usuarios = () => {
             Agregar Usuario
           </button>
         </div>
-        
+
         <div className="overflow-x-auto border rounded-xl">
           <table className="w-full text-left table-auto min-w-max text-sm">
             <thead className="bg-gray-200">
               <tr>
-                <th className="p-3 font-normal">ID</th>
+                <th className="p-3 font-normal">Id</th>
                 <th className="p-3 font-normal">Nombre</th>
+                <th className="p-3 font-normal">Apellidos</th>
                 <th className="p-3 font-normal">Correo electronico</th>
+                <th className="p-3 font-normal">Telefono</th>
+                <th className="p-3 font-normal">Rol</th>
                 <th className="p-3 font-normal">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {currentUsers.map((user) => (
+              {data?.users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-100">
                   <td className="p-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                     {user.id}
                   </td>
-                  <td className="p-3">{user.nombre}</td>
+                  <td className="p-3">{user.name}</td>
+                  <td className="p-3">{user.lastname}</td>
                   <td className="p-3">{user.email}</td>
+                  <td className="p-3">{user.phone}</td>
+                  <td className="p-3">{user.rol_id}</td>
                   <td className="p-2">
                     <div className="flex gap-2">
                       <button className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700">
@@ -82,7 +79,7 @@ const Usuarios = () => {
             </tbody>
           </table>
         </div>
-        
+
         <div className="flex justify-between items-center mt-4">
           <select
             className="p-2 border border-gray-300 rounded"
@@ -93,7 +90,7 @@ const Usuarios = () => {
             <option value="10">10 por página</option>
             <option value="15">15 por página</option>
           </select>
-        
+
           <div>
             {[
               ...Array(Math.ceil(filteredUsers.length / usersPerPage)).keys(),
@@ -101,11 +98,10 @@ const Usuarios = () => {
               <button
                 key={number + 1}
                 onClick={() => paginate(number + 1)}
-                className={`px-2 py-2 mx-1 ${
-                  currentPage === number + 1
-                    ? " text-black"
-                    : "bg-gray-300 text-black rounded-md"
-                }`}
+                className={`px-2 py-2 mx-1 ${currentPage === number + 1
+                  ? " text-black"
+                  : "bg-gray-300 text-black rounded-md"
+                  }`}
               >
                 {number + 1}
               </button>

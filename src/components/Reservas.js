@@ -1,11 +1,14 @@
 
 import React, { useState } from 'react';
+import useFetch from '../useFetchAdmin';
+import { Card } from 'flowbite-react';
 
 const Reservas = () => {
-  const [currentPage, setCurrentPage] = useState(1); 
-  const [itemsPerPage, setItemsPerPage] = useState(5); 
-  const [searchTerm, setSearchTerm] = useState(''); 
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data, loading, error } = useFetch("reservation-admin")
+  console.log(data)
 
   const reservasData = [
     { id: 1, nombre: 'Reserva 1', fecha: '2024-09-10', cabaña: 'Cabaña A', estado: 'Confirmada' },
@@ -14,10 +17,10 @@ const Reservas = () => {
     { id: 4, nombre: 'Reserva 4', fecha: '2024-09-13', cabaña: 'Cabaña D', estado: 'Confirmada' },
     { id: 5, nombre: 'Reserva 5', fecha: '2024-09-14', cabaña: 'Cabaña E', estado: 'Pendiente' },
     { id: 6, nombre: 'Reserva 6', fecha: '2024-09-15', cabaña: 'Cabaña F', estado: 'Confirmada' },
-   
+
   ];
 
- 
+
   const filteredReservas = reservasData.filter((reserva) =>
     reserva.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -30,81 +33,103 @@ const Reservas = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="reservas-container font-serif p-8">
+    <Card>
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
-          placeholder="Buscar Reserva..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="p-2 border rounded-lg w-1/3"
+          placeholder="Buscar Cabaña"
+          className="p-2 border border-gray-300 rounded-lg w-1/3 "
+          value=""
+        // onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <div className="flex space-x-4">
-          <button className=" text-black p-2 rounded border border-black hover:bg-green-800 hover:text-white">
-            Agregar Reserva
-          </button>
-        </div>
+        <button className=" text-black p-2 rounded border border-black hover:bg-green-800 hover:text-white">
+          Agregar Cabaña
+        </button>
       </div>
 
-      <div className="table-view">
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border px-4 py-2">Nombre de la Reserva</th>
-              <th className="border px-4 py-2">Fecha</th>
-              <th className="border px-4 py-2">Cabaña</th>
-              <th className="border px-4 py-2">Estado</th>
-              <th className="border px-4 py-2">Acciones</th>
+      <div className="overflow-x-auto border rounded-xl">
+        <table className="w-full text-left table-auto min-w-max text-sm">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-3 font-normal">Id</th>
+              <th className="p-3 font-normal">Nombre Cabaña</th>
+              <th className="p-3 font-normal">Fecha de Reservación</th>
+              <th className="p-3 font-normal">Comienza</th>
+              <th className="p-3 font-normal">Termina</th>
+              <th className="p-3 font-normal">Capacidad total</th>
+              <th className="p-3 font-normal">Precio</th>
+              <th className="p-3 font-normal">Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            {currentReservas.map((reserva) => (
-              <tr key={reserva.id}>
-                <td className="border px-4 py-2">{reserva.nombre}</td>
-                <td className="border px-4 py-2">{reserva.fecha}</td>
-                <td className="border px-4 py-2">{reserva.cabaña}</td>
-                <td className="border px-4 py-2">{reserva.estado}</td>
-                <td className="border px-4 py-2">
-                  <button className="bg-green-500 text-white px-2 py-1 rounded">
-                    Editar
-                  </button>
-                  <button className="bg-red-500 text-white px-2 py-1 rounded ml-2">
-                    Eliminar
-                  </button>
+          <tbody className="divide-y">
+            {data?.reservations.map((cottage, index) => (
+              <tr key={cottage.id} className="hover:bg-gray-100">
+                <td className="p-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                  {cottage.id}
+                </td>
+                <td className="p-3">{cottage.cottage_id}</td>
+                <td className="p-3">
+                  {new Date(cottage.date_reservation).toISOString().split('T')[0]}
+                </td>
+                <td className="p-3">
+                  {new Date(cottage.date_start).toISOString().split('T')[0]}
+                </td>
+                <td className="p-3">
+                  {new Date(cottage.date_end).toISOString().split('T')[0]}
+                </td>
+                <td className="p-3">{cottage.cottage_id}</td>
+                <td className="p-3">{cottage.total_price}</td>
+                {/* <td className="p-3 ">{cottage.description.length > 100
+                  ? `${cottage.description.slice(0, 40)}...`
+                  : cottage.description}</td> */}
+                {/* <td className="p-3">{cottage.capacity} Personas</td> */}
+                {/* <td className="p-3">{cottage.price}</td> */}
+                <td className="p-2">
+                  <div className="flex gap-2">
+                    <button className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700">
+                      <i className="fa-solid fa-pen "></i>
+                    </button>
+                    <button className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700">
+                      <i className="fa-solid fa-trash "></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
+
           </tbody>
         </table>
       </div>
 
-      <div className="pagination mt-4 flex justify-between items-center">
-        <div>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            className="p-2 border rounded-lg"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-          </select>
-        </div>
-        <div className="flex space-x-2">
-          {Array.from({ length: Math.ceil(filteredReservas.length / itemsPerPage) }, (_, index) => (
+      <div className="flex justify-between items-center mt-4">
+        {/* <select
+          className="p-2 border border-gray-300 rounded"
+          value={usersPerPage}
+          onChange={(e) => setUsersPerPage(Number(e.target.value))}
+        >
+          <option value="5">5 por página</option>
+          <option value="10">10 por página</option>
+          <option value="15">15 por página</option>
+        </select> */}
+
+        {/* <div>
+          {[
+            ...Array(Math.ceil(filteredUsers.length / usersPerPage)).keys(),
+          ].map((number) => (
             <button
-              key={index}
-              onClick={() => paginate(index + 1)}
-              className={`px-2 py-2 rounded-md ${
-                currentPage === index + 1 ? ' text-black' : 'bg-gray-200'
-              }`}
+              key={number + 1}
+              onClick={() => paginate(number + 1)}
+              className={`px-2 py-2 mx-1 ${currentPage === number + 1
+                ? " text-black"
+                : "bg-gray-300 text-black rounded-md"
+                }`}
             >
-              {index + 1}
+              {number + 1}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
-    </div>
+    </Card >
   );
 };
 

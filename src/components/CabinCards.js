@@ -9,7 +9,6 @@ const CabinCards = () => {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
   const {data, loading, error} = useFetch("cottage")
-  console.log(data)
   const handleCardClick = (cabin) => {
     navigate("/cabin-detail", { state: { cabin } });
     if (sectionRef.current) {
