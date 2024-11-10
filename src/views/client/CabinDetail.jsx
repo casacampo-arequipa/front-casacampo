@@ -46,23 +46,16 @@ const CabinDetail = () => {
   const [promoCode, setPromoCode] = useState("");
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [data, setData] = useState()
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState()
 
   useEffect(()=>{
     if (cabin) {
-      setLoading(true)
       axios.get( `${API_URL}/reservation`, {params: { cottage_id: cabin.cottage_id },})
       .then((resp)=> {
         setData(resp.data)
       }).catch(error=> {
         setError(error)
       })
-      .finally(
-        ()=> {
-          setLoading(false)
-        }
-      )
     }
   }, [])
 
