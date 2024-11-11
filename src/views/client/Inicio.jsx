@@ -10,17 +10,22 @@ import { LanguageContext } from "../../components/LanguageContext";
 import { useLocation } from "react-router-dom";
 import { Button, Modal } from "flowbite-react";
 import CabinCards from "./../../components/CabinCards";
+import useFetch from "../../useFetch";
 
 export default function Inicio() {
+  const { data } = useFetch("packages");
+  const { translations, setCurrentView } = useContext(LanguageContext);
+  const location = useLocation();
+  const [openModal, setOpenModal] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
+
   const viewMap = {
     "/": "Inicio",
     "/cabin-detail": "CabinDetail",
     "/welcome": "WelcomeSection",
     // Agrega más rutas y vistas aquí
   };
-  const { translations, setCurrentView } = useContext(LanguageContext);
-  const location = useLocation();
-  const [openModal, setOpenModal] = useState(false);
+
 
   useEffect(() => {
     const viewName = viewMap[location.pathname] || "Inicio"; // Vista por defecto
@@ -35,7 +40,7 @@ export default function Inicio() {
   }, []);
 
   // eslint-disable-next-line no-unused-vars
-  const [scrollPosition, setScrollPosition] = useState(0);
+
 
   // Control de desplazamiento para detectar el scroll
   window.addEventListener("scroll", () => {
@@ -138,7 +143,9 @@ export default function Inicio() {
       description: translations.piscina_description,
     },
   ];
-
+  if (data && data.packeges) {
+    console.log(data.packeges);
+  }
   return (
     <>
       <WelcomeSection />
@@ -156,7 +163,7 @@ export default function Inicio() {
               </p>
 
               <div className="w-full h-auto flex flex-wrap justify-center lg:gap-7 sm:gap-10 gap-7 px-8 sm:px-0 mt-4">
-                {packsTexts.map((service, index) => (
+                {data?.packeges.map((service, index) => (
                   <CardInicio
                     onClick={() => setOpenModal(true)}
                     data-aos="flip-up"

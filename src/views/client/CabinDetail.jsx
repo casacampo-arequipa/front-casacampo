@@ -58,7 +58,7 @@ const CabinDetail = () => {
       })
     }
   }, [])
-
+console.log(data?.reservations)
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
