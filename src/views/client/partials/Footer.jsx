@@ -174,7 +174,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Casa Campo Arequipa. Todos los
             derechos reservados.
           </p>
-          <p>Desarrollado por Grupo Peanuts</p>
+          <p>Desarrollado por Grupo Mani Code</p>
         </div>
       </footer>
     </>
