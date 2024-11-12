@@ -98,20 +98,20 @@ function Navbar(CartItem) {
             <ul className="flex divide-x opacity-0 md:opacity-100 duration-300">
               <li
                 className={`cursor-pointer px-2 rounded ${isHomePage
-                    ? scrollPosition > 0
-                      ? "hover:bg-gray-200"
-                      : "hover:bg-black/30"
-                    : "hover:bg-gray-200"
+                  ? scrollPosition > 0
+                    ? "hover:bg-gray-200"
+                    : "hover:bg-black/30"
+                  : "hover:bg-gray-200"
                   }`}
               >
                 <a href="/">{translations.inicio}</a>
               </li>
               <li
                 className={`cursor-pointer px-2 rounded ${isHomePage
-                    ? scrollPosition > 0
-                      ? "hover:bg-gray-200"
-                      : "hover:bg-black/30"
-                    : "hover:bg-gray-200"
+                  ? scrollPosition > 0
+                    ? "hover:bg-gray-200"
+                    : "hover:bg-black/30"
+                  : "hover:bg-gray-200"
                   }`}
               >
                 <Link onClick={() => scrollToSection("about")}>
@@ -120,10 +120,10 @@ function Navbar(CartItem) {
               </li>
               <li
                 className={`cursor-pointer px-2 rounded ${isHomePage
-                    ? scrollPosition > 0
-                      ? "hover:bg-gray-200"
-                      : "hover:bg-black/30"
-                    : "hover:bg-gray-200"
+                  ? scrollPosition > 0
+                    ? "hover:bg-gray-200"
+                    : "hover:bg-black/30"
+                  : "hover:bg-gray-200"
                   }`}
               >
                 <Link onClick={() => scrollToSection("contact")}>
@@ -156,6 +156,9 @@ function Navbar(CartItem) {
                       {/* <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">
                         <Link to="/profile">Perfil</Link>
                       </li> */}
+                      <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
+                        <Link to="/dashboard">Admin</Link>
+                      </li>
                       <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
                         <button onClick={() => {
                           localStorage.clear();
