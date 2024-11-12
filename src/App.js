@@ -27,6 +27,7 @@ import Usuarios from "./views/admin/Usuarios";
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // Tema de PrimeReact (elige el que prefieras)
 import 'primereact/resources/primereact.min.css'; // Estilos de los componentes de PrimeReact
 import 'primeicons/primeicons.css'; 
+import Package from "./components/Package";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -94,6 +95,7 @@ function App() {
                 <Route path="cabanas" element={<Cabanas />} />
                 <Route path="promociones" element={<Promociones />} />
                 <Route path="descuentos" element={<Descuentos />} />
+                <Route path="paquetes" element={<Package />} />
                 <Route path="reservas" element={<Reservas />} />
               </Route>
             </Routes>
