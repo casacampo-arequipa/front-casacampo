@@ -40,7 +40,7 @@ const CabinDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const cabin = location.state?.cabin || {};
-  console.log(cabin)
+  console.log(cabin);
   const [dates, setDates] = useState([new Date(), new Date()]);
   const [guests, setGuests] = useState({ adults: 1, children: 0, babies: 0 });
   const [promoCode, setPromoCode] = useState("");
@@ -129,7 +129,7 @@ console.log(data?.reservations)
             <div className="my-12">
               <h1 className="text-3xl font-bold ">{cabin.name}</h1>
               <div className="flex flex-row">
-                <p className="text-gray-600"> {cabin.capacity} personas • </p>
+
                 <p className="text-gray-600"> {cabin.rooms} Habitaciones • </p>
                 <p className="text-gray-600"> {cabin.beds} Camas • </p>
                 <p className="text-gray-600"> {cabin.baths} Baños</p>

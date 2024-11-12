@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom";
 import { Button, Modal } from "flowbite-react";
 import CabinCards from "./../../components/CabinCards";
 import useFetch from "../../useFetch";
+import { FaUsers, FaMoneyBillWave } from "react-icons/fa";
 
 export default function Inicio() {
   const { data } = useFetch("packages");
@@ -18,6 +19,7 @@ export default function Inicio() {
   const location = useLocation();
   const [openModal, setOpenModal] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   const viewMap = {
     "/": "Inicio",
@@ -146,6 +148,12 @@ export default function Inicio() {
   if (data && data.packeges) {
     console.log(data.packeges);
   }
+
+  const handlePackageClick = (service) => {
+    setSelectedPackage(service); // Guarda el paquete seleccionado
+    setOpenModal(true); // Abre el modal
+  };
+  
   return (
     <>
       <WelcomeSection />
@@ -165,20 +173,21 @@ export default function Inicio() {
               <div className="w-full h-auto flex flex-wrap justify-center lg:gap-7 sm:gap-10 gap-7 px-8 sm:px-0 mt-4">
                 {data?.packeges.map((service, index) => (
                   <CardInicio
-                    onClick={() => setOpenModal(true)}
+                    onClick={() => handlePackageClick(service)}
                     data-aos="flip-up"
                     key={index}
-                    cardClass="relative group w-40 bg-white flex flex-col items-center justify-center gap-3 px-5 pb-5 pt-8 cursor-pointer transition duration-500 hover:shadow-xl rounded-xl border hover:border-green-600 overflow-hidden"
-                    imageWrapperClass="w-20 h-20 relative z-10 object-cover"
-                    imageAlt={service.title}
-                    imageSrc={service.img}
+                    cardClass="relative group w-64 bg-white flex flex-col items-center justify-center gap-3 p-4 cursor-pointer transition duration-500 hover:shadow-xl rounded-xl border hover:border-green-600 overflow-hidden"
                     textWrapperClass="w-full flex flex-col items-center gap-2"
                   >
-                    <h4 className="text-base rounded font-semibold">
-                      {service.title}
-                    </h4>
-
-                    <div className="absolute top-2 px-1 py-1 bg-green-700 rounded-full group-hover:px-16 duration-500"></div>
+                    <div className="relative w-full h-48">
+                      <img src={service.img} alt={service.name} className="object-cover w-full h-full rounded-lg" />
+                      <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center text-center text-white opacity-0 group-hover:opacity-100 transition duration-500 p-4">
+                        <h4 className="text-lg font-bold">{service.name}</h4>
+                        <p className="text-sm">Capacidad: {service.max_person} personas</p>
+                        <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday}</p>
+                        <p className="text-sm">Precio (Viernes a Domingo): S/.{service.price_friday_to_sunday}</p>
+                      </div>
+                    </div>
                   </CardInicio>
                 ))}
               </div>
@@ -189,9 +198,33 @@ export default function Inicio() {
               >
                 <Modal.Header>Cabañas Disponibles</Modal.Header>
                 <Modal.Body>
-                  <div className="space-y-6">
-                    <CabinCards />
-                  </div>
+                  {selectedPackage && (
+                    <div className="space-y-6">
+                      {/* Información del paquete seleccionado */}
+                      <div className="bg-gray-100 rounded-lg shadow-md p-6 mb-6 text-center">
+                        <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                          {selectedPackage.name}
+                        </h3>
+                        <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+                          <div className="flex items-center gap-2 text-lg text-gray-600">
+                            <FaUsers className="text-green-600" />
+                            <span>Capacidad: {selectedPackage.max_person} personas</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-lg text-gray-600">
+                            <FaMoneyBillWave className="text-green-600" />
+                            <span>Precio (Lunes a Jueves): S/.{selectedPackage.price_monday_to_thursday}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-lg text-gray-600">
+                            <FaMoneyBillWave className="text-green-600" />
+                            <span>Precio (Viernes a Domingo): S/.{selectedPackage.price_friday_to_sunday}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Componente CabinCards que muestra las cabañas */}
+                      <CabinCards />
+                    </div>
+                  )}
                 </Modal.Body>
                 <Modal.Footer>
                   <Button color="red" onClick={() => setOpenModal(false)}>

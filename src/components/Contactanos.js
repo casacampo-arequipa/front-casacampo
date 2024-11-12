@@ -63,7 +63,7 @@ export default function Contactanos() {
                   <i className="pi pi-map-marker text-indigo-500 mb-2"></i>
                   <span className="font-bold">{translations.direccion}</span>
                   <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Arequipa - Yanahuara
                   </p>
                 </div>
                 <div className="flex flex-col mb-4">
