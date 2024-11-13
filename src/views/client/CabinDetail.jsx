@@ -42,6 +42,8 @@ const CabinDetail = () => {
   const cabin = location.state?.cabin || {};
   console.log(cabin);
   const [dates, setDates] = useState([new Date(), new Date()]);
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
   const [guests, setGuests] = useState({ adults: 1, children: 0, babies: 0 });
   const [promoCode, setPromoCode] = useState("");
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
@@ -63,8 +65,15 @@ console.log(data?.reservations)
     window.scrollTo(0, 0);
   }, []);
 
-  const handleDateChange = (dates) => {
-    setDates(dates);
+  const handleDateChange = (selectedDates) => {
+    if (selectedDates.length === 1) {
+      setDates([selectedDates[0], selectedDates[0]]);
+      setCheckInDate(selectedDates[0]); // Muestra la fecha de ingreso
+    } else {
+      setDates(selectedDates);
+      setCheckInDate(selectedDates[0]); // Actualiza la fecha de ingreso
+      setCheckOutDate(selectedDates[1]); // Muestra la fecha de salida
+    }
   };
 
   const calculateTotal = () => {
@@ -75,21 +84,58 @@ console.log(data?.reservations)
   const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
 
   const tileClassName = ({ date, view }) => {
-    if (view === "month" && data?.reservations) {
-      for (const reservation of data?.reservations) {
-        const startDate = new Date(reservation.date_start);
-        const endDate = new Date(reservation.date_end);
-
-        const isStartDate = startDate.toDateString() === date.toDateString();
-        const isEndDate = endDate.toDateString() === date.toDateString();
-        const isWithinRange = date >= startDate && date <= endDate;
-
-        if (isStartDate || isEndDate || isWithinRange) {
-          return "bg-gray-500 text-white rounded-lg";
+    if (view === "month") {
+      const isSelectedStart = dates[0] && date.toDateString() === dates[0].toDateString();
+      const isSelectedEnd = dates[1] && date.toDateString() === dates[1].toDateString();
+      const isSelectedRange = dates[0] && dates[1] && date >= dates[0] && date <= dates[1];
+  
+      if (isSelectedStart || isSelectedEnd || isSelectedRange) {
+        return "bg-red-500 text-white rounded-lg";
+      }
+  
+      if (data?.reservations) {
+        for (const reservation of data?.reservations) {
+          const startDate = new Date(reservation.date_start);
+          const endDate = new Date(reservation.date_end);
+  
+          const isStartDate = startDate.toDateString() === date.toDateString();
+          const isEndDate = endDate.toDateString() === date.toDateString();
+          const isWithinRange = date >= startDate && date <= endDate;
+  
+          if (isStartDate || isEndDate || isWithinRange) {
+            return "bg-gray-500 text-white rounded-lg";
+          }
         }
       }
     }
     return "";
+  };
+
+  const tileDisabled = ({ date, view }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Elimina la hora para comparar solo la fecha
+  
+    // Deshabilita fechas antes de hoy
+    if (date < today) {
+      return true;
+    }
+
+    // Deshabilita fechas ya reservadas
+    if (view === "month" && data?.reservations) {
+      const isReserved = data.reservations.some((reservation) => {
+        const startDate = new Date(reservation.date_start);
+        const endDate = new Date(reservation.date_end);
+        return date >= startDate && date <= endDate;
+      });
+      if (isReserved) return true;
+    }
+  
+    // Deshabilita fechas anteriores a la fecha de ingreso seleccionada
+    if (dates[0] && date < dates[0]) {
+      return false;
+    }
+
+    return false;
   };
 
   const handleGuestChange = (type, operation) => {
@@ -150,7 +196,15 @@ console.log(data?.reservations)
                 onChange={handleDateChange}
                 value={dates}
                 tileClassName={tileClassName}
+                tileDisabled={tileDisabled}
               />
+
+              {/* Mostrar fechas de ingreso y salida */}
+              <div className="mt-4 flex justify-between">
+                <p><strong>Check In:</strong> {checkInDate ? checkInDate.toLocaleDateString() : "No seleccionada"}</p>
+                <p><strong>Check Out:</strong> {checkOutDate ? checkOutDate.toLocaleDateString() : "No seleccionada"}</p>
+              </div>
+
               <hr className="mb-2 mt-4" />
 
               <div className="px-2">
