@@ -1,5 +1,5 @@
 // src/components/Descuentos.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useFetch from '../useFetchAdmin';
 import { Button, Card, Modal } from 'flowbite-react';
 import { FaMoneyBillWave, FaUsers } from 'react-icons/fa';
@@ -14,7 +14,13 @@ const Package = () => {
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [imagePhoto, setImagePhoto] = useState(null);
     const [FILE_AVATAR, setFILE_AVATAR] = useState(null);
-    console.log(imagePhoto)
+    useEffect(() => {
+        if (!openModal) {
+            setSelectedPackage(null);
+            setImagePhoto(null);
+        }
+    }, [openModal]);
+
     const handleEditClick = (packege) => {
         setSelectedPackage(packege); // Almacena el paquete seleccionado
         setImagePhoto(packege.img);
@@ -41,13 +47,57 @@ const Package = () => {
         formData.append('max_person', e.target.max_person?.value);
         formData.append('price_monday_to_thursday', e.target.price_monday_to_thursday?.value);
         formData.append('price_friday_to_sunday', e.target.price_friday_to_sunday?.value);
-        formData.append('img', FILE_AVATAR);
+        formData.append('guarantee', e.target.guarantee?.value);
+        formData.append('cleaning', e.target.cleaning?.value);
+        formData.append('imagen', FILE_AVATAR);
+
+        if (selectedPackage) {
+            try {
+                const response = await axios.post(
+                    `${API_URL}/packages-admin/${selectedPackage.id}`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token()}`, // Añade el token al header
+                        }
+                    }
+                ).then((resp) => { console.log(resp) });
+
+                alert("Información guardada exitosamente");
+                setOpenModal(false);
+                window.location.reload();
+            } catch (error) {
+                console.error("Error al guardar los datos:", error);
+                alert("Hubo un error al guardar los datos");
+            }
+        } else {
+            try {
+                const response = await axios.post(
+                    `${API_URL}/packages-admin`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token()}`, // Añade el token al header
+                        }
+                    }
+                ).then((resp) => { console.log(resp) });
+
+                alert("Información guardada exitosamente");
+                setOpenModal(false);
+                window.location.reload();
+            } catch (error) {
+                console.error("Error al guardar los datos:", error);
+                alert("Hubo un error al guardar los datos");
+            }
+        }
 
 
+    };
+
+    const handledeleteClick = async (id) => {
         try {
-            const response = await axios.post(
-                `${API_URL}/packages-admin/${selectedPackage.id}`,
-                formData,
+            await axios.delete(
+                `${API_URL}/packages-admin/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token()}`, // Añade el token al header
@@ -55,12 +105,12 @@ const Package = () => {
                 }
             ).then((resp) => { console.log(resp) });
 
-            alert("Información guardada exitosamente");
-            setOpenModal(false); // Cierra el modal
-            // Aquí puedes agregar lógica adicional si necesitas refrescar los datos
+            alert("Información eliminada exitosamente");
+            setOpenModal(false);
+            window.location.reload();
         } catch (error) {
-            console.error("Error al guardar los datos:", error);
-            alert("Hubo un error al guardar los datos");
+            console.error("Error al eliminar los datos:", error);
+            alert("Hubo un error al eliminadar los datos");
         }
     };
 
@@ -74,8 +124,8 @@ const Package = () => {
                     value=""
                 // onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <button className=" text-black p-2 rounded border border-black hover:bg-green-800 hover:text-white">
-                    Agregar Cabaña
+                <button className=" text-black p-2 rounded border border-black hover:bg-green-800 hover:text-white" onClick={() => setOpenModal(true)}>
+                    Nuevo Paquete
                 </button>
             </div>
 
@@ -89,6 +139,8 @@ const Package = () => {
                             <th className="border px-4 py-2">Capacidad</th>
                             <th className="border px-4 py-2">Precio de L- J</th>
                             <th className="border px-4 py-2">Precio de V - D</th>
+                            <th className="border px-4 py-2">Precio de Garantia</th>
+                            <th className="border px-4 py-2">Precio de Limpieza</th>
                             <th className="border px-4 py-2">Acciones</th>
                         </tr>
                     </thead>
@@ -107,12 +159,14 @@ const Package = () => {
                                     : packege.description}</td> */}
                                 <td className="p-3">{packege.price_monday_to_thursday} </td>
                                 <td className="p-3">{packege.price_friday_to_sunday}</td>
+                                <td className="p-3">{packege.guarantee}</td>
+                                <td className="p-3">{packege.cleaning}</td>
                                 <td className="p-2">
                                     <div className="flex gap-2">
                                         <button className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700" onClick={() => handleEditClick(packege)}>
                                             <i className="fa-solid fa-pen "></i>
                                         </button>
-                                        <button className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700">
+                                        <button className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700" onClick={() => handledeleteClick(packege.id)}>
                                             <i className="fa-solid fa-trash "></i>
                                         </button>
                                     </div>
@@ -126,7 +180,7 @@ const Package = () => {
                         onClose={() => setOpenModal(false)}
                     >
                         <form onSubmit={handleSave}>
-                            <Modal.Header>Editar Paquete</Modal.Header>
+                            <Modal.Header> {selectedPackage ? "Editar Paquete" : "Nuevo Paquete"}</Modal.Header>
                             <Modal.Body>
                                 <div className="space-y-6">
                                     {/* Imagen de avatar */}
@@ -254,7 +308,36 @@ const Package = () => {
                                                 />
                                             </div>
                                         </div>
-
+                                        <div className='flex gap-x-4'>
+                                            <div className='w-full'>
+                                                <label className="block text-sm font-medium text-gray-700 ">
+                                                    Precio de Garantia
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    id="guarantee"
+                                                    required
+                                                    name="guarantee"
+                                                    defaultValue={selectedPackage?.guarantee}
+                                                    placeholder=" Precio de Lunes a Jueves"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                />
+                                            </div>
+                                            <div className='w-full'>
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Precio de Limpieza
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    id="cleaning"
+                                                    required
+                                                    name="cleaning"
+                                                    defaultValue={selectedPackage?.cleaning}
+                                                    placeholder="Precio de Viernes a Domingo"
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                />
+                                            </div>
+                                        </div>
 
                                         {/* <div>
                                         <label className="block text-sm font-medium text-gray-700">
