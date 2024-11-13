@@ -210,7 +210,7 @@ console.log(data?.reservations)
               <div className="px-2">
                 <div className="flex justify-between">
                   <span>Precio por noche:</span>
-                  <span>S/. {cabin.price.toFixed(2)}</span>
+                  <span>S/. {cabin.price ? cabin.price.toFixed(2) : "No disponible"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total de noches:</span>
