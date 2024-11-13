@@ -47,9 +47,9 @@ const Register = () => {
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/users', formData);
-      
+
       if (response.status === 201) {
-        // If registration is successful, redirect to login page
+
         navigate('/login');
       }
     } catch (error) {
@@ -72,24 +72,22 @@ const Register = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">Registrarse</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="firstName" className="block text-gray-700">Nombre</label>
+            <label htmlFor="firstName" className="block text-gray-700">Nombre Completo</label>
             <input
               type="text"
               id="name"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              value={formData.name}
               onChange={handleInputChange}
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="lastName" className="block text-gray-700">Apellido</label>
+            <label htmlFor="lastName" className="block text-gray-700">Apellidos</label>
             <input
               type="text"
               id="lastname"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              value={formData.lastname}
               onChange={handleInputChange}
             />
           </div>
@@ -100,7 +98,6 @@ const Register = () => {
               id="phone"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              value={formData.phone}
               onChange={handleInputChange}
             />
           </div>
@@ -111,7 +108,6 @@ const Register = () => {
               id="email"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              value={formData.email}
               onChange={handleInputChange}
             />
           </div>
@@ -123,7 +119,7 @@ const Register = () => {
               placeholder="Selecciona tu país"
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label htmlFor="username" className="block text-gray-700">Usuario</label>
             <input
               type="text"
@@ -133,7 +129,7 @@ const Register = () => {
               value={formData.user}
               onChange={handleInputChange}
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700">Contraseña</label>
             <input
@@ -141,7 +137,17 @@ const Register = () => {
               id="password"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              value={formData.password}
+
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-gray-700">Confirmar Contraseña</label>
+            <input
+              type="password_confirmation"
+              id="password_confirmation"
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
               onChange={handleInputChange}
             />
           </div>

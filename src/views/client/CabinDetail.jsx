@@ -50,17 +50,20 @@ const CabinDetail = () => {
   const [data, setData] = useState()
   const [error, setError] = useState()
 
-  useEffect(()=>{
+  useEffect(() => {
+    let data = {
+      cottage_id: cabin.cottage_id
+    }
     if (cabin) {
-      axios.get( `${API_URL}/reservation`, {params: { cottage_id: cabin.cottage_id },})
-      .then((resp)=> {
-        setData(resp.data)
-      }).catch(error=> {
-        setError(error)
-      })
+      axios.get(`${API_URL}/reservation`, data)
+        .then((resp) => {
+          setData(resp.data)
+        }).catch(error => {
+          setError(error)
+        })
     }
   }, [])
-console.log(data?.reservations)
+  console.log(data)
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -88,20 +91,20 @@ console.log(data?.reservations)
       const isSelectedStart = dates[0] && date.toDateString() === dates[0].toDateString();
       const isSelectedEnd = dates[1] && date.toDateString() === dates[1].toDateString();
       const isSelectedRange = dates[0] && dates[1] && date >= dates[0] && date <= dates[1];
-  
+
       if (isSelectedStart || isSelectedEnd || isSelectedRange) {
         return "bg-red-500 text-white rounded-lg";
       }
-  
+
       if (data?.reservations) {
         for (const reservation of data?.reservations) {
           const startDate = new Date(reservation.date_start);
           const endDate = new Date(reservation.date_end);
-  
+
           const isStartDate = startDate.toDateString() === date.toDateString();
           const isEndDate = endDate.toDateString() === date.toDateString();
           const isWithinRange = date >= startDate && date <= endDate;
-  
+
           if (isStartDate || isEndDate || isWithinRange) {
             return "bg-gray-500 text-white rounded-lg";
           }
@@ -114,7 +117,7 @@ console.log(data?.reservations)
   const tileDisabled = ({ date, view }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Elimina la hora para comparar solo la fecha
-  
+
     // Deshabilita fechas antes de hoy
     if (date < today) {
       return true;
@@ -129,7 +132,7 @@ console.log(data?.reservations)
       });
       if (isReserved) return true;
     }
-  
+
     // Deshabilita fechas anteriores a la fecha de ingreso seleccionada
     if (dates[0] && date < dates[0]) {
       return false;
@@ -181,7 +184,7 @@ console.log(data?.reservations)
                 <p className="text-gray-600"> {cabin.baths} Baños</p>
               </div>
               <p className="text-gray-800 my-12">
-              {cabin.description}
+                {cabin.description}
               </p>
             </div>
           </div>
@@ -209,8 +212,17 @@ console.log(data?.reservations)
 
               <div className="px-2">
                 <div className="flex justify-between">
-                  <span>Precio por noche:</span>
-                  <span>S/. {cabin.price ? cabin.price.toFixed(2) : "No disponible"}</span>
+                  <span>Precio de Lunes a Jueves por noche:</span>
+                  <span>
+                    S/. {cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday).toFixed(2) : "No disponible"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Precio de Viernes a Domingo por noche:</span>
+                  <span>
+                    S/. {cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday).toFixed(2) : "No disponible"}
+                  </span>
+
                 </div>
                 <div className="flex justify-between">
                   <span>Total de noches:</span>

@@ -1,15 +1,28 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import cabana1 from "../assets/cabana1.jpg";
 import cabana2 from "../assets/cabana2.jpg"; // Asegúrate de tener una imagen diferente aquí
 import { LanguageContext } from "./LanguageContext";
-import useFetch from "../useFetch";
+import axios from "axios";
+import { API_URL } from "../env";
 
-const CabinCards = () => {
+const CabinCards = ({ packageId }) => {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
-  const { data, loading, error } = useFetch("cottage");
-  console.log(data);
+  const [data, setData] = useState()
+  const [error, setError] = useState()
+  console.log(data)
+  useEffect(() => {
+    if (packageId) {
+      axios.get(`${API_URL}/cottage`, { params: { package_id: packageId } })
+        .then((resp) => {
+          setData(resp.data);
+        })
+        .catch((error) => {
+          setError(error);
+        });
+    }
+  }, [packageId])
 
   const handleCardClick = (cabin) => {
     navigate("/cabin-detail", { state: { cabin } });
@@ -36,8 +49,11 @@ const CabinCards = () => {
                 rooms: cottage.rooms,
                 beds: cottage.beds,
                 baths: cottage.bathrooms,
+                clear: cottage.clear,
+                garantia: cottage.garantia,
                 description: cottage.description,
-                price: cottage.price,
+                price_monday_to_thursday: cottage.price_monday_to_thursday,
+                price_friday_to_sunday: cottage.price_friday_to_sunday,
               })
             }
           >

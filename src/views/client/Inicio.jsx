@@ -222,7 +222,7 @@ export default function Inicio() {
                       </div>
 
                       {/* Componente CabinCards que muestra las cabañas */}
-                      <CabinCards />
+                      <CabinCards packageId={selectedPackage.id} />
                     </div>
                   )}
                 </Modal.Body>
