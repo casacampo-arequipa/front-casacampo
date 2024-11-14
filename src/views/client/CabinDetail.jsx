@@ -37,6 +37,7 @@ const CabinDetail = () => {
     },
   ];
 
+  const [showModal, setShowModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const cabin = location.state?.cabin || {};
@@ -80,9 +81,34 @@ const CabinDetail = () => {
   };
 
   const calculateTotal = () => {
-    const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
-    return numberOfNights * cabin.price;
-  };
+  const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
+
+  let total = 0;
+
+  // Calcular el total de las noches
+  for (let i = 0; i < numberOfNights; i++) {
+    const currentDay = new Date(dates[0]);
+    currentDay.setDate(currentDay.getDate() + i);
+
+    // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
+    if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
+      // Lunes a Jueves
+      total += cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday) : 0;
+    } else {
+      // Viernes a Domingo
+      total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
+    }
+  }
+
+  // Agregar cargos adicionales si existen
+  const clearCharge = cabin.clear ? Number(cabin.clear) : 0;  // Costo adicional por limpieza
+  const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0;  // Costo adicional por garantía
+
+  // Sumar los cargos adicionales al total
+  total += clearCharge + garantiaCharge;
+
+  return total; // Total base sin IGV
+};
 
   const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
 
@@ -153,7 +179,7 @@ const CabinDetail = () => {
     });
   };
 
-  const handleReservation = () => {
+  const proceedToPayment = () => {
     const total = calculateTotal();
     navigate("/pago", { state: { dates, guests, total } });
   };
@@ -165,9 +191,18 @@ const CabinDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleReservation = () => {
+    setShowModal(true); // Muestra el modal
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false); // Cierra el modal
+  };
+
   return (
     <ColoredSection>
       <div className="py-12 px-4">
+      <h1 className="text-3xl font-bold ">{cabin.name}</h1>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
             <img
@@ -176,7 +211,7 @@ const CabinDetail = () => {
               className="w-full h-auto object-cover rounded-lg shadow-lg"
             />
             <div className="my-12">
-              <h1 className="text-3xl font-bold ">{cabin.name}</h1>
+              <h1 className="text-3xl font-bold ">{cabin.name_cottage}</h1>
               <div className="flex flex-row">
 
                 <p className="text-gray-600"> {cabin.rooms} Habitaciones • </p>
@@ -186,6 +221,16 @@ const CabinDetail = () => {
               <p className="text-gray-800 my-12">
                 {cabin.description}
               </p>
+              <div className="text-gray-600 mt-4">
+                <p><strong>Check In:</strong> Desde las 11 am</p>
+                <p><strong>Check Out:</strong> 9 am (hora exacta)</p>
+                <p className="mt-2">
+                  <strong>Tarifa de limpieza:</strong> S/. {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
+                </p>
+                <p>
+                  <strong>Garantía:</strong> S/. {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantia se hara devolucion, pero se podría deducir de la garantía en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
+                </p>
+              </div>
             </div>
           </div>
 
@@ -232,9 +277,29 @@ const CabinDetail = () => {
 
               <hr className="my-2" />
 
+              
+
+              <div className="mt-4">
+                <div className="flex justify-between">
+                  <span>Tarifa de limpieza:</span>
+                  <span>{cabin.clear ? cabin.clear : "No especificado"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Garantía:</span>
+                  <span>{cabin.garantia ? cabin.garantia : "No especificada"}</span>
+                </div>
+              </div>
+
+              
+              
               <div className="flex justify-between bg-black text-white p-2 rounded-lg">
                 <span>Total a Pagar:</span>
                 <span>S/. {calculateTotal().toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>IGV (18%):</span>
+                <span>S/. { (calculateTotal() - (calculateTotal() / 1.18)).toFixed(2) }</span>
               </div>
 
               <hr className="my-2" />
@@ -342,56 +407,80 @@ const CabinDetail = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 rounded-xl overflow-hidden border border-red-800">
-            <div className="bg-red-800 px-4 py-2">
-              <h2 className="text-base font-semibold text-white">
-                {translations.comentarios}
-              </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+ 
+
+  {/* Sección de comentarios */}
+  <div className="md:col-span-2 rounded-xl overflow-hidden border border-red-800 order-2 md:order-none">
+    <div className="bg-red-800 px-4 py-2">
+      <h2 className="text-base font-semibold text-white">
+        {translations.comentarios}
+      </h2>
+    </div>
+    <div className="px-4 py-2">
+      <div className="space-y-4">
+        {comments.map((comment, index) => (
+          <div key={index} className="">
+            <div className="flex gap-2 mb-2 items-center">
+              <FaUser className="text-3xl cursor-pointer" />
+              <div className="flex flex-col">
+                <span className="text-gray-800 font-semibold">{comment.author}</span>
+                <span className="text-gray-600 text-sm">{comment.date}</span>
+              </div>
             </div>
-            <div className="px-4 py-2">
-              <div className="space-y-4">
-                {comments.map((comment, index) => (
-                  <div key={index} className="">
-                    <div className="flex gap-2 mb-2 items-center">
-                      <FaUser className="text-3xl cursor-pointer" />
-                      <div className="flex flex-col">
-                        <span className="text-gray-800 font-semibold">{comment.author}</span>
-                        <span className="text-gray-600 text-sm">{comment.date}</span>
+            <div>
+              <p className="text-gray-800">{comment.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+   {/* Mover el div de "Deja tu comentario" arriba de los comentarios en pantallas móviles */}
+   <div className="md:col-span-1 rounded-xl overflow-hidden border border-red-800 h-max order-1 md:order-none">
+    <div className="bg-red-800 px-4 py-2">
+      <h2 className="text-base font-semibold text-white">Deja tu comentario</h2>
+    </div>
+    <div className="px-4 py-2">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
+          <input
+            type="text"
+            placeholder="Aquí tu comentario"
+            className="p-2 border rounded-lg text-sm w-full sm:w-auto"
+          />
+          <button className="px-4 py-2 bg-gray-200 hover:bg-green-700 hover:text-white rounded-lg duration-500">
+            <i className="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+                 {/* Modal */}
+                 {showModal && (
+                    <div
+                      className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+                      onClick={handleCloseModal} // Cierra el modal al hacer clic en el fondo
+                    >
+                      <div
+                        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full"
+                        onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el modal
+                      >
+                        <h2 className="text-xl font-semibold mb-4">Reserva no disponible en línea</h2>
+                        <p className="mb-4">
+                          Por el momento, no se pueden hacer reservas en línea. Por favor, comuníquese con nuestro WhatsApp y envíe una captura de las fechas y precios para separar su reserva indiquenos el paquete y cabaña seleccionada.
+                        </p>
+                        
+                        <button
+                          onClick={handleCloseModal}
+                          className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-lg"
+                        >
+                          Cerrar
+                        </button> 
                       </div>
                     </div>
-                    <div>
-                      <p className="text-gray-800">{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl overflow-hidden border border-red-800 h-max">
-            <div className="bg-red-800 px-4 py-2">
-              <h2 className="text-base font-semibold text-white">
-                Deja tu comentario
-              </h2>
-            </div>
-            <div className="px-4 py-2">
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    placeholder="aqui tu comentario"
-                    className="p-2 border rounded-lg text-sm w-full"
-                  />
-                  <button className="ml-2 px-4 py-2 bg-gray-200 hover:bg-green-700 hover:text-white rounded-lg duration-500">
-                    <i className="fa-solid fa-paper-plane"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+                  )}
       </div>
     </ColoredSection>
   );

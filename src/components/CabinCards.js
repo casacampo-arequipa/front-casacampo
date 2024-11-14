@@ -43,7 +43,7 @@ const CabinCards = ({ packageId }) => {
             onClick={() =>
               handleCardClick({
                 cottage_id: cottage.id,
-                name: cottage.name_cottage,
+                name_cottage: cottage.name_cottage,
                 image: cottage.image || (index % 2 === 0 ? cabana1 : cabana2), // Alterna entre cabana1 y cabana2
                 capacity: cottage.capacity,
                 rooms: cottage.rooms,
