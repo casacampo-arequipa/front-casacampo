@@ -278,66 +278,72 @@ const Package = () => {
                                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                         />
                                     </div> */}
-                                        <div className='flex gap-x-4'>
-                                            <div className='w-full'>
-                                                <label className="block text-sm font-medium text-gray-700 ">
+                                        <div className="flex gap-x-4">
+                                            <div className="w-full">
+                                                <label className="block text-sm font-medium text-gray-700">
                                                     Precio de Lunes a Jueves
                                                 </label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     id="price_monday_to_thursday"
                                                     required
                                                     name="price_monday_to_thursday"
                                                     defaultValue={selectedPackage?.price_monday_to_thursday}
-                                                    placeholder=" Precio de Lunes a Jueves"
+                                                    placeholder="Precio de Lunes a Jueves"
+                                                    pattern="^\d+(\.\d{1,2})?$" // Permite números decimales con hasta 2 decimales
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 />
                                             </div>
-                                            <div className='w-full'>
+                                            <div className="w-full">
                                                 <label className="block text-sm font-medium text-gray-700">
                                                     Precio de Viernes a Domingo
                                                 </label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     id="price_friday_to_sunday"
                                                     required
                                                     name="price_friday_to_sunday"
                                                     defaultValue={selectedPackage?.price_friday_to_sunday}
                                                     placeholder="Precio de Viernes a Domingo"
+                                                    pattern="^\d+(\.\d{1,2})?$"
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 />
                                             </div>
                                         </div>
-                                        <div className='flex gap-x-4'>
-                                            <div className='w-full'>
-                                                <label className="block text-sm font-medium text-gray-700 ">
-                                                    Precio de Garantia
+
+                                        <div className="flex gap-x-4">
+                                            <div className="w-full">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Precio de Garantía
                                                 </label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     id="guarantee"
                                                     required
                                                     name="guarantee"
                                                     defaultValue={selectedPackage?.guarantee}
-                                                    placeholder=" Precio de Lunes a Jueves"
+                                                    placeholder="Precio de Garantía"
+                                                    pattern="^\d+(\.\d{1,2})?$"
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 />
                                             </div>
-                                            <div className='w-full'>
+                                            <div className="w-full">
                                                 <label className="block text-sm font-medium text-gray-700">
                                                     Precio de Limpieza
                                                 </label>
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     id="cleaning"
                                                     required
                                                     name="cleaning"
                                                     defaultValue={selectedPackage?.cleaning}
-                                                    placeholder="Precio de Viernes a Domingo"
+                                                    placeholder="Precio de Limpieza"
+                                                    pattern="^\d+(\.\d{1,2})?$"
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 />
                                             </div>
                                         </div>
+
 
                                         {/* <div>
                                         <label className="block text-sm font-medium text-gray-700">
