@@ -80,9 +80,34 @@ const CabinDetail = () => {
   };
 
   const calculateTotal = () => {
-    const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
-    return numberOfNights * cabin.price;
-  };
+  const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
+
+  let total = 0;
+
+  // Calcular el total de las noches
+  for (let i = 0; i < numberOfNights; i++) {
+    const currentDay = new Date(dates[0]);
+    currentDay.setDate(currentDay.getDate() + i);
+
+    // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
+    if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
+      // Lunes a Jueves
+      total += cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday) : 0;
+    } else {
+      // Viernes a Domingo
+      total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
+    }
+  }
+
+  // Agregar cargos adicionales si existen
+  const clearCharge = cabin.clear ? Number(cabin.clear) : 0;  // Costo adicional por limpieza
+  const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0;  // Costo adicional por garantía
+
+  // Sumar los cargos adicionales al total
+  total += clearCharge + garantiaCharge;
+
+  return total; // Total base sin IGV
+};
 
   const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
 
@@ -168,6 +193,7 @@ const CabinDetail = () => {
   return (
     <ColoredSection>
       <div className="py-12 px-4">
+      <h1 className="text-3xl font-bold ">{cabin.name}</h1>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
             <img
@@ -176,7 +202,7 @@ const CabinDetail = () => {
               className="w-full h-auto object-cover rounded-lg shadow-lg"
             />
             <div className="my-12">
-              <h1 className="text-3xl font-bold ">{cabin.name}</h1>
+              <h1 className="text-3xl font-bold ">{cabin.name_cottage}</h1>
               <div className="flex flex-row">
 
                 <p className="text-gray-600"> {cabin.rooms} Habitaciones • </p>
@@ -232,9 +258,29 @@ const CabinDetail = () => {
 
               <hr className="my-2" />
 
+              
+
+              <div className="mt-4">
+                <div className="flex justify-between">
+                  <span>Tarifa de limpieza:</span>
+                  <span>{cabin.clear ? cabin.clear : "No especificado"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Garantía:</span>
+                  <span>{cabin.garantia ? cabin.garantia : "No especificada"}</span>
+                </div>
+              </div>
+
+              
+              
               <div className="flex justify-between bg-black text-white p-2 rounded-lg">
                 <span>Total a Pagar:</span>
                 <span>S/. {calculateTotal().toFixed(2)}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span>IGV (18%):</span>
+                <span>S/. { (calculateTotal() - (calculateTotal() / 1.18)).toFixed(2) }</span>
               </div>
 
               <hr className="my-2" />

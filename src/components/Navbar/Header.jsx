@@ -15,7 +15,7 @@ export default function Header({
         }`}>
         <ul className="flex space-x-4 justify-center flex-wrap">
           <li className="flex items-center">
-            <i className="fa-solid fa-location-dot mr-1"></i>Arequipa
+            <i className="fa-solid fa-location-dot mr-1"></i>Arequipa - Yanahuara
           </li>
           <li className="flex items-center">
             <i className="fa-solid fa-phone mr-1"></i>+51 987563711

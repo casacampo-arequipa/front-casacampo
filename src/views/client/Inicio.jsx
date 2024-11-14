@@ -184,8 +184,8 @@ export default function Inicio() {
                       <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center text-center text-white opacity-0 group-hover:opacity-100 transition duration-500 p-4">
                         <h4 className="text-lg font-bold">{service.name}</h4>
                         <p className="text-sm">Capacidad: {service.max_person} personas</p>
-                        <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday}</p>
-                        <p className="text-sm">Precio (Viernes a Domingo): S/.{service.price_friday_to_sunday}</p>
+                        <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday} / noche</p>
+                        <p className="text-sm">Precio (Viernes a Domingo): S/.{service.price_friday_to_sunday} / noche</p>
                       </div>
                     </div>
                   </CardInicio>
@@ -212,11 +212,11 @@ export default function Inicio() {
                           </div>
                           <div className="flex items-center gap-2 text-lg text-gray-600">
                             <FaMoneyBillWave className="text-green-600" />
-                            <span>Precio (Lunes a Jueves): S/.{selectedPackage.price_monday_to_thursday}</span>
+                            <span>Precio (Lunes a Jueves): S/.{selectedPackage.price_monday_to_thursday} / noche</span>
                           </div>
                           <div className="flex items-center gap-2 text-lg text-gray-600">
                             <FaMoneyBillWave className="text-green-600" />
-                            <span>Precio (Viernes a Domingo): S/.{selectedPackage.price_friday_to_sunday}</span>
+                            <span>Precio (Viernes a Domingo)/noche: S/.{selectedPackage.price_friday_to_sunday} / noche</span>
                           </div>
                         </div>
                       </div>

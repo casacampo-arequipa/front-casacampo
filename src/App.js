@@ -28,6 +28,8 @@ import 'primereact/resources/themes/lara-light-indigo/theme.css'; // Tema de Pri
 import 'primereact/resources/primereact.min.css'; // Estilos de los componentes de PrimeReact
 import 'primeicons/primeicons.css'; 
 import Package from "./components/Package";
+import Galeria from "./components/Galeria"; // Importa el componente Galeria
+
 
 function Layout({ children }) {
   const location = useLocation();
@@ -88,6 +90,15 @@ function App() {
               <Route path="/pago" element={<PaymentPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route
+                path="/galeria"
+                element={
+                  <>
+                    <Galeria />
+                    <SocialMediaIcons />
+                  </>
+                }
+              />
 
               {/* Dashboard con Sidebar persistente */}
               <Route path="/dashboard" element={<DashboardLayout />}>
