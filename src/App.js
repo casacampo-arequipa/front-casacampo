@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import { useLocation, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DashboardLayout from "./pages/DashboardLayout"; // Importa DashboardLayout
@@ -29,6 +24,9 @@ import 'primereact/resources/primereact.min.css'; // Estilos de los componentes 
 import 'primeicons/primeicons.css'; 
 import Package from "./components/Package";
 import Galeria from "./components/Galeria"; // Importa el componente Galeria
+import { HashRouter as Router } from "react-router-dom";
+
+
 
 
 function Layout({ children }) {
