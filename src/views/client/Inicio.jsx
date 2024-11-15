@@ -20,6 +20,8 @@ export default function Inicio() {
   const [openModal, setOpenModal] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showServiceModal, setShowServiceModal] = useState(false);
 
   const viewMap = {
     "/": "Inicio",
@@ -72,15 +74,31 @@ export default function Inicio() {
 
   const serviceTexts = [
     {
+      img: "/icons/vista_montana.png",
+      title: translations.vista_montana_title,
+      description: translations.vista_montana_description,
+    },
+    {
+      img: "/icons/piscina.png",
+      title: translations.piscina_title,
+      description: translations.piscina_description,
+    },
+    {
       img: "/icons/wifi_gratis.png",
       title: translations.wifi_gratuito_title, // Traducción dinámica
       description: translations.wifi_gratuito_description, // Traducción dinámica
     },
     {
-      img: "/icons/vista_montana.png",
-      title: translations.vista_montana_title,
-      description: translations.vista_montana_description,
+      img: "/icons/cocina.png",
+      title: translations.cocina_title,
+      description: translations.cocina_description,
     },
+    {
+      img: "/icons/fogata.png",
+      title: translations.fogata_title,
+      description: translations.fogata_description,
+    },
+    
     {
       img: "/icons/estacionamiento.png",
       title: translations.estacionamiento_title,
@@ -97,21 +115,25 @@ export default function Inicio() {
       description: translations.television_description,
     },
     {
-      img: "/icons/piscina.png",
-      title: translations.piscina_title,
-      description: translations.piscina_description,
+      img: "/icons/grill.png",
+      title: translations.parrilla_title,
+      description: translations.parrilla_description,
     },
     {
-      img: "/icons/cocina.png",
-      title: translations.cocina_title,
-      description: translations.cocina_description,
+      img: "/icons/futbol.png",
+      title: translations.futbol_title,
+      description: translations.futbol_description,
     },
     {
-      img: "/icons/fogata.png",
-      title: translations.fogata_title,
-      description: translations.fogata_description,
+      img: "/icons/sapo.png",
+      title: translations.sapo_title,
+      description: translations.sapo_description,
     },
+    
   ];
+
+  const handleServiceModalOpen = () => setShowServiceModal(true); // Función para abrir modal
+  const handleServiceModalClose = () => setShowServiceModal(false);
 
   const packsTexts = [
     {
@@ -148,6 +170,10 @@ export default function Inicio() {
   if (data && data.packeges) {
     console.log(data.packeges);
   }
+
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription);
+  };
 
   const handlePackageClick = (service) => {
     setSelectedPackage(service); // Guarda el paquete seleccionado
@@ -191,53 +217,65 @@ export default function Inicio() {
                     <h4 className="text-lg font-bold">{service.name}</h4>
                     <p className="text-sm">Capacidad: {service.max_person} personas</p>
                     <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday} / noche</p>
-                    <p className="text-sm">Precio (Viernes a Domingo): S/.{service.price_friday_to_sunday} / noche</p>
+                    <p className="text-sm">Precio (Viernes y Domingo): S/.{service.price_friday_to_sunday} / noche</p>
+                    <p className="text-sm">"NO INCLUYE FERIADOS NI FECHAS ESPECIALES"</p>
                   </div>
                 </CardInicio>
                 ))}
               </div>
-              <Modal
-  size="4xl"
-  show={openModal}
-  onClose={() => setOpenModal(false)}
->
-  <Modal.Header>Cabañas Disponibles</Modal.Header>
-  <Modal.Body>
-    {selectedPackage && (
-      <div className="space-y-6">
-        {/* Información del paquete seleccionado */}
-        <div className="bg-gray-100 rounded-lg shadow-md p-6 mb-6 text-center">
-          <h3 className="text-3xl font-bold text-gray-800 mb-4">
-            {selectedPackage.name}
-          </h3>
-          <p className="text-gray-700 mb-4">{selectedPackage.description}</p>
-          <div className="flex flex-col md:flex-row justify-center items-center gap-6">
-            <div className="flex items-center gap-2 text-lg text-gray-600">
-              <FaUsers className="text-green-600" />
-              <span>Capacidad: {selectedPackage.max_person} personas</span>
-            </div>
-            <div className="flex items-center gap-2 text-lg text-gray-600">
-              <FaMoneyBillWave className="text-green-600" />
-              <span>Precio (Lunes a Jueves): S/.{selectedPackage.price_monday_to_thursday} / noche</span>
-            </div>
-            <div className="flex items-center gap-2 text-lg text-gray-600">
-              <FaMoneyBillWave className="text-green-600" />
-              <span>Precio (Viernes a Domingo): S/.{selectedPackage.price_friday_to_sunday} / noche</span>
-            </div>
-          </div>
-        </div>
+              <Modal size="4xl" show={openModal} onClose={() => setOpenModal(false)}>
+                <Modal.Header>Cabañas Disponibles</Modal.Header>
+                <Modal.Body>
+                  {selectedPackage && (
+                    <div className="space-y-6">
+                      {/* Información del paquete seleccionado */}
+                      <div className="bg-gray-100 rounded-lg shadow-md p-6 mb-6 text-center">
+                        <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                          {selectedPackage.name}
+                        </h3>
+                        <p
+                          className={`text-gray-700 mb-4 ${
+                            showFullDescription ? "" : "line-clamp-3"
+                          }`}
+                        >
+                          {selectedPackage.description}
+                        </p>
+                        {/* Botón para ver más/ver menos */}
+                        {selectedPackage.description.length > 150 && (
+                          <button
+                            onClick={toggleDescription}
+                            className="text-blue-500 hover:text-blue-700 focus:outline-none"
+                          >
+                            {showFullDescription ? "Ver menos" : "Ver más"}
+                          </button>
+                        )}
+                        <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+                          <div className="flex items-center gap-2 text-lg text-gray-600">
+                            <FaUsers className="text-green-600" />
+                            <span>Capacidad: {selectedPackage.max_person} personas</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-lg text-gray-600">
+                            <FaMoneyBillWave className="text-green-600" />
+                            <span>Precio (Lunes a Jueves): S/.{selectedPackage.price_monday_to_thursday} / noche</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-lg text-gray-600">
+                            <FaMoneyBillWave className="text-green-600" />
+                            <span>Precio (Viernes a Domingo): S/.{selectedPackage.price_friday_to_sunday} / noche</span>
+                          </div>
+                        </div>
+                      </div>
 
-        {/* Componente CabinCards que muestra las cabañas */}
-        <CabinCards packageId={selectedPackage.id} />
-      </div>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button color="red" onClick={() => setOpenModal(false)}>
-      Cancelar
-    </Button>
-  </Modal.Footer>
-</Modal>
+                      {/* Componente CabinCards que muestra las cabañas */}
+                      <CabinCards packageId={selectedPackage.id} />
+                    </div>
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button color="red" onClick={() => setOpenModal(false)}>
+                    Cancelar
+                  </Button>
+                </Modal.Footer>
+              </Modal>
 
             </main>
           </section>
@@ -275,7 +313,7 @@ export default function Inicio() {
             </h2>
 
             <div className="w-full h-auto grid lg:grid-cols-4 sm:grid-cols-2 lg:gap-7 sm:gap-10 gap-7 px-8 sm:px-0 mt-4">
-              {serviceTexts.map((service, index) => (
+              {serviceTexts.slice(0, 4).map((service, index) => (
                 <CardInicio
                   data-aos="flip-up"
                   key={index}
@@ -288,7 +326,7 @@ export default function Inicio() {
                   <h4 className="text-base rounded font-semibold">
                     {service.title}
                   </h4>
-                  <p className="text-sm  font-light text-center">
+                  <p className="text-sm font-light text-center">
                     {service.description}
                   </p>
 
@@ -296,6 +334,45 @@ export default function Inicio() {
                 </CardInicio>
               ))}
             </div>
+
+            {/* Botón para ver más servicios */}
+            <button
+              onClick={handleServiceModalOpen}
+              className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              Ver más servicios
+            </button>
+
+            {/* Modal para mostrar más servicios */}
+            <Modal show={showServiceModal} onClose={handleServiceModalClose}>
+              <Modal.Header>Servicios adicionales</Modal.Header>
+              <Modal.Body>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {serviceTexts.slice(4).map((service, index) => (
+                    <CardInicio
+                      key={index}
+                      cardClass="relative group w-full flex flex-col items-center justify-center gap-3 p-5 cursor-pointer transition duration-500 hover:shadow-xl rounded-xl border hover:border-red-700 overflow-hidden"
+                      imageWrapperClass="w-20 h-20 relative z-10 object-cover"
+                      imageAlt={service.title}
+                      imageSrc={service.img}
+                      textWrapperClass="w-full flex flex-col items-center gap-2"
+                    >
+                      <h4 className="text-base rounded font-semibold">
+                        {service.title}
+                      </h4>
+                      <p className="text-sm font-light text-center">
+                        {service.description}
+                      </p>
+                    </CardInicio>
+                  ))}
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button onClick={handleServiceModalClose} color="red">
+                  Cerrar
+                </Button>
+              </Modal.Footer>
+            </Modal>
           </main>
         </section>
       </ColoredSection>

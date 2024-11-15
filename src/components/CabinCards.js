@@ -52,6 +52,7 @@ const CabinCards = ({ packageId }) => {
                 clear: cottage.clear,
                 garantia: cottage.garantia,
                 description: cottage.description,
+                max_person: cottage.max_person,
                 price_monday_to_thursday: cottage.price_monday_to_thursday,
                 price_friday_to_sunday: cottage.price_friday_to_sunday,
               })

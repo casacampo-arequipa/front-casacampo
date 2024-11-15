@@ -156,109 +156,139 @@ const Galeria = () => {
 
   ];
 
-   // Estado para la página actual y el modal
-   const [currentPage, setCurrentPage] = useState(1);
-   const [isModalOpen, setIsModalOpen] = useState(false);
-   const [selectedImage, setSelectedImage] = useState(null);
- 
-   const imagesPerPage = 10;
- 
-   // Calcular las imágenes a mostrar en la página actual
-   const indexOfLastImage = currentPage * imagesPerPage;
-   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-   const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
- 
-   // Cambiar de página
-   const paginate = (pageNumber) => setCurrentPage(pageNumber);
- 
-   // Calcular el número total de páginas
-   const pageNumbers = [];
-   for (let i = 1; i <= Math.ceil(images.length / imagesPerPage); i++) {
-     pageNumbers.push(i);
-   }
- 
-   // Función para abrir el modal
-   const openModal = (image) => {
-     setSelectedImage(image);
-     setIsModalOpen(true);
-   };
- 
-   // Función para cerrar el modal
-   const closeModal = () => {
-     setIsModalOpen(false);
-     setSelectedImage(null);
-   };
- 
-   return (
-     <div className="max-w-7xl mx-auto p-4">
-       {/* Imagen principal */}
-       <div className="mb-8">
-         <img
-           src={currentImages[0]}
-           alt="Principal"
-           className="w-full h-auto rounded-lg shadow-lg"
-         />
-       </div>
- 
-       {/* Otras imágenes */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-         {currentImages.slice(1).map((image, index) => (
-           <div key={index} className="relative group h-64"> {/* Altura fija para las imágenes */}
-             <img
-               src={image}
-               alt={`Imagen ${index + 2}`}
-               className="w-full h-full object-cover rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-105 cursor-pointer"
-               onClick={() => openModal(image)} // Abre el modal al hacer clic
-             />
-           </div>
-         ))}
-       </div>
- 
-       {/* Paginación */}
-       <div className="flex justify-center mt-8">
-         <nav>
-           <ul className="flex space-x-4">
-             {pageNumbers.map((number) => (
-               <li key={number}>
-                 <button
-                   onClick={() => paginate(number)}
-                   className={`px-4 py-2 rounded-lg ${
-                     currentPage === number
-                       ? "bg-red-700 text-white"
-                       : "bg-gray-200 text-black hover:bg-gray-300"
-                   }`}
-                 >
-                   {number}
-                 </button>
-               </li>
-             ))}
-           </ul>
-         </nav>
-       </div>
- 
-       {/* Modal */}
-       {isModalOpen && (
-         <div
-           className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-           onClick={closeModal}
-         >
-           <div className="relative bg-white p-4 rounded-lg">
-             <button
-               className="absolute top-0 right-0 p-2 text-red-500"
-               onClick={closeModal}
-             >
-               X
-             </button>
-             <img
-               src={selectedImage}
-               alt="Imagen seleccionada"
-               className="max-w-full max-h-[80vh] object-contain" // Ajustar tamaño de la imagen
-             />
-           </div>
-         </div>
-       )}
-     </div>
-   );
- };
- 
- export default Galeria;
+  // Estado para la página actual y el modal
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const imagesPerPage = 10;
+  const maxPageNumbers = 5; // Número máximo de páginas a mostrar en el paginador
+
+  // Calcular las imágenes a mostrar en la página actual
+  const indexOfLastImage = currentPage * imagesPerPage;
+  const indexOfFirstImage = indexOfLastImage - imagesPerPage;
+  const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+
+  // Cambiar de página
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Calcular el número total de páginas
+  const totalPages = Math.ceil(images.length / imagesPerPage);
+
+  // Rango de páginas para mostrar
+  const startPage = Math.max(1, currentPage - Math.floor(maxPageNumbers / 2));
+  const endPage = Math.min(totalPages, startPage + maxPageNumbers - 1);
+
+  // Función para abrir el modal
+  const openModal = (image) => {
+    setSelectedImage(image);
+    setIsModalOpen(true);
+  };
+
+  // Función para cerrar el modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
+
+  // Función para avanzar de página
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Función para retroceder de página
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-4">
+      {/* Imagen principal */}
+      <div className="mb-8">
+        <img
+          src={currentImages[0]}
+          alt="Principal"
+          className="w-full h-auto rounded-lg shadow-lg"
+        />
+      </div>
+
+      {/* Otras imágenes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {currentImages.slice(1).map((image, index) => (
+          <div key={index} className="relative group h-64">
+            <img
+              src={image}
+              alt={`Imagen ${index + 2}`}
+              className="w-full h-full object-cover rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-105 cursor-pointer"
+              onClick={() => openModal(image)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Paginación */}
+      <div className="flex justify-center items-center mt-8 space-x-2">
+        <button
+          onClick={prevPage}
+          className="px-3 py-1 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
+          disabled={currentPage === 1}
+        >
+          {"<"}
+        </button>
+
+        {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((number) => (
+          <button
+            key={number}
+            onClick={() => paginate(number)}
+            className={`px-3 py-1 rounded-lg ${
+              currentPage === number
+                ? "bg-red-700 text-white"
+                : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
+          >
+            {number}
+          </button>
+        ))}
+
+        <button
+          onClick={nextPage}
+          className="px-3 py-1 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
+          disabled={currentPage === totalPages}
+        >
+          {">"}
+        </button>
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+          onClick={closeModal}
+        >
+          <div
+            className="relative bg-white p-4 rounded-lg w-full max-w-lg mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-2 right-2 p-2 text-red-500"
+              onClick={closeModal}
+            >
+              X
+            </button>
+            <img
+              src={selectedImage}
+              alt="Imagen seleccionada"
+              className="w-full max-h-[80vh] object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Galeria;
