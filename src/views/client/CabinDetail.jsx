@@ -4,11 +4,12 @@ import Calendar from "react-calendar";
 import axios from "axios"
 import { LanguageContext } from "../../components/LanguageContext";
 import ColoredSection from "../../components/Section/ColoredSection";
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import { FaUser } from "react-icons/fa";
 import { API_URL } from "../../env";
 
 
-const CabinDetail = () => {
+const CabinDetail = ({ max_person }) => {
   const comments = [
     {
       author: "Juan Pérez",
@@ -38,6 +39,7 @@ const CabinDetail = () => {
   ];
 
   const [showModal, setShowModal] = useState(false);
+  const [showInitialPopup, setShowInitialPopup] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const cabin = location.state?.cabin || {};
@@ -50,6 +52,12 @@ const CabinDetail = () => {
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [data, setData] = useState()
   const [error, setError] = useState()
+
+  useEffect(() => {
+    // Configuración del modal emergente que se cierra automáticamente
+    const timer = setTimeout(() => setShowInitialPopup(false), 5000); // Cierra el popup después de 5 segundos
+    return () => clearTimeout(timer); // Limpia el temporizador al desmontar el componente
+  }, []);
 
   useEffect(() => {
     let data = {
@@ -71,12 +79,15 @@ const CabinDetail = () => {
 
   const handleDateChange = (selectedDates) => {
     if (selectedDates.length === 1) {
-      setDates([selectedDates[0], selectedDates[0]]);
-      setCheckInDate(selectedDates[0]); // Muestra la fecha de ingreso
+      // Cuando se selecciona una sola fecha, asignar check-in a esa fecha y check-out al día siguiente
+      setDates([selectedDates[0], new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000)]);
+      setCheckInDate(selectedDates[0]);
+      setCheckOutDate(new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000));
     } else {
-      setDates(selectedDates);
-      setCheckInDate(selectedDates[0]); // Actualiza la fecha de ingreso
-      setCheckOutDate(selectedDates[1]); // Muestra la fecha de salida
+      // Cuando se seleccionan dos fechas, asignar check-in a la primera fecha y check-out al día siguiente de la última fecha
+      setDates([selectedDates[0], selectedDates[1]]);
+      setCheckInDate(selectedDates[0]);
+      setCheckOutDate(new Date(selectedDates[1].getTime() + 24 * 60 * 60 * 1000));
     }
   };
 
@@ -203,6 +214,27 @@ const CabinDetail = () => {
     <ColoredSection>
       <div className="py-12 px-4">
       <h1 className="text-3xl font-bold ">{cabin.name}</h1>
+
+       {/* Popup inicial */}
+       {showInitialPopup && (
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+            onClick={() => setShowInitialPopup(false)} // Cierra el popup al hacer clic fuera de él
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+              <h2 className="text-xl font-semibold mb-4">Recuerde</h2>
+              <p className="text-gray-700 mb-4">
+                Tome en cuenta la capacidad de <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas del paquete al reservar esta cabaña.
+              </p>
+              <button
+                onClick={() => setShowInitialPopup(false)} // Botón para cerrar el popup
+                className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
             <img
@@ -213,24 +245,26 @@ const CabinDetail = () => {
             <div className="my-12">
               <h1 className="text-3xl font-bold ">{cabin.name_cottage}</h1>
               <div className="flex flex-row">
-
-                <p className="text-gray-600"> {cabin.rooms} Habitaciones • </p>
-                <p className="text-gray-600"> {cabin.beds} Camas • </p>
-                <p className="text-gray-600"> {cabin.baths} Baños</p>
+              <p className="text-gray-600">
+                Capacidad <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas
+              </p>
               </div>
               <p className="text-gray-800 my-12">
                 {cabin.description}
               </p>
               <div className="text-gray-600 mt-4">
-                <p><strong>Check In:</strong> Desde las 11 am</p>
-                <p><strong>Check Out:</strong> 9 am (hora exacta)</p>
-                <p className="mt-2">
-                  <strong>Tarifa de limpieza:</strong> S/. {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
-                </p>
-                <p>
-                  <strong>Garantía:</strong> S/. {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantia se hara devolucion, pero se podría deducir de la garantía en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
-                </p>
-              </div>
+  <h2 className="text-2xl text-black font-bold mb-2">INDICACIONES:</h2>
+
+  <p><strong>Check In:</strong> <span className="font-bold">Desde las 11 am</span></p>
+  <p><strong>Check Out:</strong> <span className="font-bold">9 am (hora exacta)</span></p>
+  <p className="mt-2">
+    <strong>Tarifa de limpieza:</strong> S/. {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
+  </p>
+  <p>
+    <strong>Garantía:</strong> S/. {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantía se hará devolución, pero se podría deducir en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
+  </p>
+</div>
+
             </div>
           </div>
 
@@ -246,6 +280,10 @@ const CabinDetail = () => {
                 tileClassName={tileClassName}
                 tileDisabled={tileDisabled}
               />
+               {/* Nota para estancia de una noche */}
+              <p className="text-sm text-gray-500 mt-2">
+                Nota: Si desea reservar solo una noche, seleccione la misma fecha de entrada y salida.
+              </p>
 
               {/* Mostrar fechas de ingreso y salida */}
               <div className="mt-4 flex justify-between">
@@ -263,7 +301,7 @@ const CabinDetail = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Precio de Viernes a Domingo por noche:</span>
+                  <span>Precio de Viernes y Domingo por noche:</span>
                   <span>
                     S/. {cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday).toFixed(2) : "No disponible"}
                   </span>
@@ -311,78 +349,83 @@ const CabinDetail = () => {
                 >
                   {`Huéspedes: ${guests.adults} Adulto(s), ${guests.children} Niño(s), ${guests.babies} Bebé(s)`}
                 </button>
-                {isGuestDropdownOpen && (
-                  <div className="absolute z-10 bg-white shadow-lg p-4 mt-2 rounded-lg w-full">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p>Adultos (Edad 13+):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleGuestChange("adults", "decrement")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.adults}</p>
-                          <button
-                            onClick={() =>
-                              handleGuestChange("adults", "increment")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p>Niños (Edad 2-12):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleGuestChange("children", "decrement")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.children}</p>
-                          <button
-                            onClick={() =>
-                              handleGuestChange("children", "increment")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p>Bebés (Menos de 2 años):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleGuestChange("babies", "decrement")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.babies}</p>
-                          <button
-                            onClick={() =>
-                              handleGuestChange("babies", "increment")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {isGuestDropdownOpen &&  (
+  <div className="absolute z-10 bg-white shadow-lg p-4 mt-2 rounded-lg w-full">
+    <div className="space-y-2">
+      {/* Adultos */}
+      <div className="flex justify-between items-center">
+        <p>Adultos (Edad 13+):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("adults", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.adults}</p>
+          <button
+            onClick={() => {
+              // Verifica si el número total de adultos + niños no supera el max_person
+              if (guests.adults + guests.children < cabin.max_person) {
+                handleGuestChange("adults", "increment");
+              }
+            }}
+            className="p-2 border rounded-full"
+            disabled={guests.adults + guests.children >= max_person} // Deshabilita si se supera el límite
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Niños */}
+      <div className="flex justify-between items-center">
+        <p>Niños (Edad 2-12):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("children", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.children}</p>
+          <button
+            onClick={() => {
+              // Verifica si el número total de adultos + niños no supera el max_person
+              if (guests.adults + guests.children < cabin.max_person) {
+                handleGuestChange("children", "increment");
+              }
+            }}
+            className="p-2 border rounded-full"
+            disabled={guests.adults + guests.children >= cabin.max_person} // Deshabilita si se supera el límite
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Bebés */}
+      <div className="flex justify-between items-center">
+        <p>Bebés (Menos de 2 años):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("babies", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.babies}</p>
+          <button
+            onClick={() => handleGuestChange("babies", "increment")}
+            className="p-2 border rounded-full"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
               </div>
               <div className="mt-2 flex items-center">
                 <input
@@ -459,28 +502,50 @@ const CabinDetail = () => {
 </div>
                  {/* Modal */}
                  {showModal && (
-                    <div
-                      className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-                      onClick={handleCloseModal} // Cierra el modal al hacer clic en el fondo
-                    >
-                      <div
-                        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full"
-                        onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el modal
-                      >
-                        <h2 className="text-xl font-semibold mb-4">Reserva no disponible en línea</h2>
-                        <p className="mb-4">
-                          Por el momento, no se pueden hacer reservas en línea. Por favor, comuníquese con nuestro WhatsApp y envíe una captura de las fechas y precios para separar su reserva indiquenos el paquete y cabaña seleccionada.
-                        </p>
-                        
-                        <button
-                          onClick={handleCloseModal}
-                          className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-lg"
-                        >
-                          Cerrar
-                        </button> 
-                      </div>
-                    </div>
-                  )}
+  <div
+    className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+    onClick={handleCloseModal} // Cierra el modal al hacer clic en el fondo
+  >
+    <div
+      className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
+      onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el modal
+    >
+      <button
+        onClick={handleCloseModal}
+        className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+        aria-label="Cerrar"
+      >
+        <i className="fa fa-times text-xl"></i>
+      </button>
+      
+      <h2 className="text-xl font-semibold mb-4">Reservas</h2>
+      <p className="mb-4">
+        Las reservas se gestionan exclusivamente a través de nuestro WhatsApp. Por favor, envíenos una captura de las fechas para confirmar su reserva, e indíquenos el paquete y la cabaña seleccionada.
+      </p>
+      
+      <a
+  href={`https://api.whatsapp.com/send?phone=51987563711&text=${encodeURIComponent(
+    `Hola, deseo reservar la cabaña "${cabin.name_cottage}".\n` +
+    `- Check-In: ${checkInDate ? checkInDate.toLocaleDateString() : "No especificado"}\n` +
+    `- Check-Out: ${checkOutDate ? checkOutDate.toLocaleDateString() : "No especificado"}\n` +
+    `- Paquete seleccionado: ${cabin.name}\n` +
+    `- Total a pagar: S/. ${calculateTotal().toFixed(2)}\n` +
+    `- Detalle de huéspedes:\n` +
+    `  * Adultos: ${guests.adults}\n` +   `  * Niños: ${guests.children}\n` +
+    `  * Bebés: ${guests.babies}\n` +
+    `Por favor, confirmen mi reserva. ¡Gracias!`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center"
+>
+        <i className="fab fa-whatsapp mr-2"></i> {/* Ícono de WhatsApp */}
+        Contactar por WhatsApp
+      </a>
+    </div>
+  </div>
+)}
+
       </div>
     </ColoredSection>
   );

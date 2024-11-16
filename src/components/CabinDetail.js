@@ -107,7 +107,7 @@ const CabinDetail = () => {
           <div className="my-12">
             <h1 className="text-3xl font-bold ">{cabin.name}</h1>
             <div className="flex flex-row">
-              <p className="text-gray-600"> {cabin.capacity} personas • </p>
+              <p className="text-gray-600"> {cabin.max_person} personas • </p>
               <p className="text-gray-600"> {cabin.rooms} Habitaciones • </p>
               <p className="text-gray-600"> {cabin.beds} Camas • </p>
               <p className="text-gray-600"> {cabin.baths} Baños</p>

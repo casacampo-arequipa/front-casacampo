@@ -35,6 +35,15 @@ const SocialMediaIcons = () => {
           <i className="fa-brands fa-tiktok"></i>
         </div>
       </a>
+
+      <a
+        href="#/galeria"
+        className="hover:scale-110 transition-transform"
+      >
+        <div className="flex justify-center items-center bg-red-800 hover:bg-green-800 text-white rounded-full shadow-md h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12">
+          <i className="fa-solid fa-camera"></i>
+        </div>
+      </a>
     </div>
   );
 };
