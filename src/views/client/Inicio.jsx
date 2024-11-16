@@ -266,7 +266,7 @@ export default function Inicio() {
                       </div>
 
                       {/* Componente CabinCards que muestra las cabañas */}
-                      <CabinCards packageId={selectedPackage.id} />
+                      <CabinCards name={selectedPackage.name} max_person={selectedPackage.max_person} packageId={selectedPackage.id} />
                     </div>
                   )}
                 </Modal.Body>

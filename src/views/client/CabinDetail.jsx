@@ -9,7 +9,7 @@ import { FaUser } from "react-icons/fa";
 import { API_URL } from "../../env";
 
 
-const CabinDetail = () => {
+const CabinDetail = ({ max_person }) => {
   const comments = [
     {
       author: "Juan Pérez",
@@ -224,7 +224,7 @@ const CabinDetail = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
               <h2 className="text-xl font-semibold mb-4">Recuerde</h2>
               <p className="text-gray-700 mb-4">
-                Tome en cuenta la capacidad de personas del paquete al reservar esta cabaña.
+                Tome en cuenta la capacidad de <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas del paquete al reservar esta cabaña.
               </p>
               <button
                 onClick={() => setShowInitialPopup(false)} // Botón para cerrar el popup
@@ -246,27 +246,25 @@ const CabinDetail = () => {
               <h1 className="text-3xl font-bold ">{cabin.name_cottage}</h1>
               <div className="flex flex-row">
               <p className="text-gray-600">
-                {cabin.max_person ? cabin.max_person:""} Personas •
+                Capacidad <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas
               </p>
-                <p className="text-gray-600"> {cabin.rooms} Habitaciones • </p>
-                <p className="text-gray-600"> {cabin.beds} Camas • </p>
-                <p className="text-gray-600"> {cabin.baths} Baños</p>
               </div>
               <p className="text-gray-800 my-12">
                 {cabin.description}
               </p>
               <div className="text-gray-600 mt-4">
-                <h2 className="text-2xl text-black font-bold mb-2">INDICACIONES:</h2>
-                
-                <p><strong>Check In:</strong> Desde las 11 am</p>
-                <p><strong>Check Out:</strong> 9 am (hora exacta)</p>
-                <p className="mt-2">
-                  <strong>Tarifa de limpieza:</strong> S/. {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
-                </p>
-                <p>
-                  <strong>Garantía:</strong> S/. {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantía se hará devolución, pero se podría deducir en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
-                </p>
-              </div>
+  <h2 className="text-2xl text-black font-bold mb-2">INDICACIONES:</h2>
+
+  <p><strong>Check In:</strong> <span className="font-bold">Desde las 11 am</span></p>
+  <p><strong>Check Out:</strong> <span className="font-bold">9 am (hora exacta)</span></p>
+  <p className="mt-2">
+    <strong>Tarifa de limpieza:</strong> S/. {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
+  </p>
+  <p>
+    <strong>Garantía:</strong> S/. {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantía se hará devolución, pero se podría deducir en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
+  </p>
+</div>
+
             </div>
           </div>
 
@@ -351,78 +349,83 @@ const CabinDetail = () => {
                 >
                   {`Huéspedes: ${guests.adults} Adulto(s), ${guests.children} Niño(s), ${guests.babies} Bebé(s)`}
                 </button>
-                {isGuestDropdownOpen && (
-                  <div className="absolute z-10 bg-white shadow-lg p-4 mt-2 rounded-lg w-full">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p>Adultos (Edad 13+):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleGuestChange("adults", "decrement")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.adults}</p>
-                          <button
-                            onClick={() =>
-                              handleGuestChange("adults", "increment")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p>Niños (Edad 2-12):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleGuestChange("children", "decrement")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.children}</p>
-                          <button
-                            onClick={() =>
-                              handleGuestChange("children", "increment")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p>Bebés (Menos de 2 años):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              handleGuestChange("babies", "decrement")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.babies}</p>
-                          <button
-                            onClick={() =>
-                              handleGuestChange("babies", "increment")
-                            }
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {isGuestDropdownOpen &&  (
+  <div className="absolute z-10 bg-white shadow-lg p-4 mt-2 rounded-lg w-full">
+    <div className="space-y-2">
+      {/* Adultos */}
+      <div className="flex justify-between items-center">
+        <p>Adultos (Edad 13+):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("adults", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.adults}</p>
+          <button
+            onClick={() => {
+              // Verifica si el número total de adultos + niños no supera el max_person
+              if (guests.adults + guests.children < cabin.max_person) {
+                handleGuestChange("adults", "increment");
+              }
+            }}
+            className="p-2 border rounded-full"
+            disabled={guests.adults + guests.children >= max_person} // Deshabilita si se supera el límite
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Niños */}
+      <div className="flex justify-between items-center">
+        <p>Niños (Edad 2-12):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("children", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.children}</p>
+          <button
+            onClick={() => {
+              // Verifica si el número total de adultos + niños no supera el max_person
+              if (guests.adults + guests.children < cabin.max_person) {
+                handleGuestChange("children", "increment");
+              }
+            }}
+            className="p-2 border rounded-full"
+            disabled={guests.adults + guests.children >= cabin.max_person} // Deshabilita si se supera el límite
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Bebés */}
+      <div className="flex justify-between items-center">
+        <p>Bebés (Menos de 2 años):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("babies", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.babies}</p>
+          <button
+            onClick={() => handleGuestChange("babies", "increment")}
+            className="p-2 border rounded-full"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
               </div>
               <div className="mt-2 flex items-center">
                 <input

@@ -6,12 +6,12 @@ import { LanguageContext } from "./LanguageContext";
 import axios from "axios";
 import { API_URL } from "../env";
 
-const CabinCards = ({ packageId }) => {
+const CabinCards = ({ packageId, max_person, name }) => {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
   const [data, setData] = useState()
   const [error, setError] = useState()
-  console.log(data)
+  console.log(max_person)
   useEffect(() => {
     if (packageId) {
       axios.get(`${API_URL}/cottage`, { params: { package_id: packageId } })
@@ -52,7 +52,8 @@ const CabinCards = ({ packageId }) => {
                 clear: cottage.clear,
                 garantia: cottage.garantia,
                 description: cottage.description,
-                max_person: cottage.max_person,
+                max_person: max_person,
+                name: name,
                 price_monday_to_thursday: cottage.price_monday_to_thursday,
                 price_friday_to_sunday: cottage.price_friday_to_sunday,
               })
