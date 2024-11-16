@@ -385,9 +385,12 @@ export default function Inicio() {
                 <div className="text-base text-yellow-500">
                   {translations.nuestra_oferta}
                 </div>
+                <h1>
                 <div className="text-2xl font-extrabold">
                   {translations.explora_casa_campo_arequipa}
                 </div>
+                </h1>
+                
               </div>
 
               <p data-aos="fade-left">
