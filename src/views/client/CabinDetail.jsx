@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import axios from "axios"
 import { LanguageContext } from "../../components/LanguageContext";
+import { UserContext } from "../../contexts/UserContext";
 import ColoredSection from "../../components/Section/ColoredSection";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { FaUser } from "react-icons/fa";
@@ -38,6 +39,7 @@ const CabinDetail = ({ max_person, }) => {
     },
   ];
 
+  const { user } = useContext(UserContext); 
   const [showModal, setShowModal] = useState(false);
   const [showInitialPopup, setShowInitialPopup] = useState(true);
   const location = useLocation();
@@ -121,7 +123,8 @@ const CabinDetail = ({ max_person, }) => {
   return total; // Total base sin IGV
 };
 
-  const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
+const numberOfNights = Math.round((dates[1] - dates[0]) / (1000 * 60 * 60 * 24));
+
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
@@ -191,9 +194,44 @@ const CabinDetail = ({ max_person, }) => {
   };
 
   const proceedToPayment = () => {
+    if (!user) {
+      navigate("/login", {
+        state: {
+          from: "/cabin-detail",
+          cabin,
+          dates,
+          guests,
+          clear: cabin.clear,
+          garantia: cabin.garantia,
+          checkInDate,
+          checkOutDate,
+          totalNights: numberOfNights, // Total de noches
+          priceMondayThursday: cabin.price_monday_to_thursday,
+          priceFridaySunday: cabin.price_friday_to_sunday,
+        },
+      });
+      return;
+    }
+  
     const total = calculateTotal();
-    navigate("/pago", { state: { dates, guests, total } });
+    navigate("/pago", {
+      state: {
+        cabin,
+        dates,
+        guests,
+        total,
+        clear: cabin.clear,
+        garantia: cabin.garantia,
+        checkInDate,
+        checkOutDate,
+        totalNights: numberOfNights, // Total de noches
+        priceMondayThursday: cabin.price_monday_to_thursday,
+        priceFridaySunday: cabin.price_friday_to_sunday,
+      },
+    });
   };
+  
+  
 
   const { translations, setCurrentView } = useContext(LanguageContext);
 
@@ -202,13 +240,13 @@ const CabinDetail = ({ max_person, }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleReservation = () => {
-    setShowModal(true); // Muestra el modal
-  };
+  
 
   const handleCloseModal = () => {
     setShowModal(false); // Cierra el modal
   };
+
+  
 
   return (
     <ColoredSection>
@@ -456,8 +494,8 @@ const CabinDetail = ({ max_person, }) => {
               </div>
 
               <button
-                onClick={handleReservation}
                 className="mt-4 text-black border px-4 py-2 rounded-lg hover:bg-red-700 hover:text-white"
+                onClick={proceedToPayment}
               >
                 {translations.reservar}
               </button>
@@ -514,53 +552,7 @@ const CabinDetail = ({ max_person, }) => {
       </div>
     </div>
   </div>
-</div>
-                 {/* Modal */}
-                 {showModal && (
-  <div
-    className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-    onClick={handleCloseModal} // Cierra el modal al hacer clic en el fondo
-  >
-    <div
-      className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
-      onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el modal
-    >
-      <button
-        onClick={handleCloseModal}
-        className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
-        aria-label="Cerrar"
-      >
-        <i className="fa fa-times text-xl"></i>
-      </button>
-      
-      <h2 className="text-xl font-semibold mb-4">Reservas</h2>
-      <p className="mb-4">
-        Las reservas se gestionan exclusivamente a través de nuestro WhatsApp. Por favor, envíenos una captura de las fechas para confirmar su reserva, e indíquenos el paquete y la cabaña seleccionada.
-      </p>
-      
-      <a
-  href={`https://api.whatsapp.com/send?phone=51987563711&text=${encodeURIComponent(
-    `Hola, deseo reservar la cabaña "${cabin.name_cottage}".\n` +
-    `- Check-In: ${checkInDate ? checkInDate.toLocaleDateString() : "No especificado"}\n` +
-    `- Check-Out: ${checkOutDate ? checkOutDate.toLocaleDateString() : "No especificado"}\n` +
-    `- Paquete seleccionado: ${cabin.name}\n` +
-    `- Total a pagar: S/. ${calculateTotal().toFixed(2)}\n` +
-    `- Detalle de huéspedes:\n` +
-    `  * Adultos: ${guests.adults}\n` +   `  * Niños: ${guests.children}\n` +
-    `  * Bebés: ${guests.babies}\n` +
-    `Por favor, confirmen mi reserva. ¡Gracias!`
-  )}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center"
->
-        <i className="fab fa-whatsapp mr-2"></i> {/* Ícono de WhatsApp */}
-        Contactar por WhatsApp
-      </a>
-    </div>
-  </div>
-)}
-
+</div>               
       </div>
     </ColoredSection>
   );
