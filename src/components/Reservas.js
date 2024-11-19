@@ -5,11 +5,12 @@ import { Button, Card, Modal } from 'flowbite-react';
 import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
+import Swal from 'sweetalert2';
 
 const Reservas = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openModal, setOpenModal] = useState(false);
-  const [isActive, setIsActive] = useState(1);
+  const [isActive, setIsActive] = useState(0);
   const [selectedUser, setSelectedUser] = useState('');
   const { data, loading, error } = useFetch("reservation-admin");
   const [help, setHelpers] = useState([]);
@@ -58,9 +59,14 @@ const Reservas = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const calculateTotal = () => {
+    if (!dateStart || !dateEnd || !selectedPackage) return;
+
     const startDate = new Date(dateStart + 'T00:00:00');
     const endDate = new Date(dateEnd + 'T00:00:00');
     const oneDay = 24 * 60 * 60 * 1000; // Milisegundos en un día
+
+    // Excluir el día de salida
+    const adjustedEndDate = new Date(endDate.getTime() - oneDay);
 
     let currentDate = new Date(startDate);
 
@@ -69,8 +75,8 @@ const Reservas = () => {
 
     let totalPrice = cleaningPrice + guaranteePrice;
 
-
-    while (currentDate <= endDate) {
+    // Recorrer solo las noches
+    while (currentDate <= adjustedEndDate) {
       const day = currentDate.getDay(); // 0: Domingo, 1: Lunes, ..., 6: Sábado
       console.log(day);
       if (day >= 1 && day <= 4) {
@@ -88,6 +94,7 @@ const Reservas = () => {
   };
 
 
+
   const handleDateStartChange = (e) => {
     const start = e.target.value;
     setDateStart(start);
@@ -100,6 +107,14 @@ const Reservas = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!selectedUser || !selectedPackage || selectedCottage.length === 0 || !dateStart || !dateEnd || total === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Todos los campos son obligatorios. Por favor, verifica la información ingresada.',
+      });
+      return; // Detener la ejecución si falta algún campo
+    }
     let data = {
       user_id: selectedUser,
       package_id: selectedPackage.id,
@@ -146,12 +161,51 @@ const Reservas = () => {
       setOpenModal(false);
       window.location.reload();
     } catch (error) {
-      console.error("Error al guardar los datos:", error);
-      alert("Hubo un error al guardar los datos");
-    }
-    // }
+      if (error.response && error.response.data) {
+        const errorData = error.response.data; // Acceder a los datos del error
+        console.log(errorData); // Para depuración
 
-  };
+        let errorMessage = 'Ocurrió un error inesperado.';
+
+        // Verificar si el error está en formato JSON
+        try {
+          const parsedError = typeof errorData === 'string' ? JSON.parse(errorData) : errorData;
+
+          // Caso 1: Error específico con campos como `date_start` o `cottage_ids`
+          if (parsedError['date_start']) {
+            errorMessage = 'La fecha de inicio debe ser una fecha posterior al día de hoy.';
+          } else if (parsedError['cottage_ids']) {
+            errorMessage = 'Debes seleccionar al menos una cabaña.';
+          }
+
+          // Caso 2: Error general con `message`
+          if (parsedError.message) {
+            errorMessage = parsedError.message;
+          }
+        } catch (parseError) {
+          // Si no es un JSON válido, manejarlo como texto plano
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        }
+
+        // Mostrar mensaje de error con SweetAlert
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al guardar los datos',
+          text: errorMessage,
+        });
+      } else {
+        // Caso genérico si no hay datos en la respuesta
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al guardar los datos',
+          text: 'Ocurrió un error inesperado.',
+        });
+      }
+    }
+
+  }
 
   return (
     <Card>
@@ -361,8 +415,8 @@ const Reservas = () => {
                     <div
                       key={cottage.id}
                       className={`cursor-pointer border rounded-lg shadow-sm p-4 flex flex-col items-center transition duration-300 ease-in-out ${selectedCottage.includes(cottage.id)
-                          ? 'border-blue-500 shadow-lg bg-blue-100'
-                          : 'border-gray-300'
+                        ? 'border-blue-500 shadow-lg bg-blue-100'
+                        : 'border-gray-300'
                         }`}
                       onClick={() => toggleCottageSelection(cottage.id)} // Permite seleccionar o deseleccionar
                     >
@@ -404,7 +458,7 @@ const Reservas = () => {
                     value={dateEnd}
                     onChange={(e) => {
                       setDateEnd(e.target.value);
-                      calculateTotal(); // Llamamos a la función inmediatamente después de actualizar el estado
+                      // Llamamos a la función inmediatamente después de actualizar el estado
                     }}
                     placeholder="Fecha de salida"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"

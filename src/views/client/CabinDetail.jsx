@@ -80,50 +80,61 @@ const CabinDetail = ({ max_person, }) => {
   }, []);
 
   const handleDateChange = (selectedDates) => {
-    if (selectedDates.length === 1) {
-      // Cuando se selecciona una sola fecha, asignar check-in a esa fecha y check-out al día siguiente
-      setDates([selectedDates[0], new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000)]);
-      setCheckInDate(selectedDates[0]);
-      setCheckOutDate(new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000));
+    if (selectedDates.length === 2) {
+      const [checkIn, checkOut] = selectedDates;
+  
+      // Validar que Check-Out no sea igual a Check-In
+      if (checkIn.toDateString() === checkOut.toDateString()) {
+        setErrorMessage("Debes seleccionar al menos una noche para la reserva.");
+        return;
+      }
+  
+      // Si la validación pasa, actualiza los estados
+      setDates(selectedDates);
+      setCheckInDate(checkIn);
+      setCheckOutDate(checkOut);
+      setErrorMessage(""); // Limpia cualquier mensaje de error
     } else {
-      // Cuando se seleccionan dos fechas, asignar check-in a la primera fecha y check-out al día siguiente de la última fecha
-      setDates([selectedDates[0], selectedDates[1]]);
+      setDates([selectedDates[0], null]); // Selección inicial
       setCheckInDate(selectedDates[0]);
-      setCheckOutDate(new Date(selectedDates[1].getTime() + 24 * 60 * 60 * 1000));
+      setCheckOutDate(null);
     }
   };
 
   const calculateTotal = () => {
-  const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
-
-  let total = 0;
-
-  // Calcular el total de las noches
-  for (let i = 0; i < numberOfNights; i++) {
-    const currentDay = new Date(dates[0]);
-    currentDay.setDate(currentDay.getDate() + i);
-
-    // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
-    if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
-      // Lunes a Jueves
-      total += cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday) : 0;
-    } else {
-      // Viernes a Domingo
-      total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
+    if (!dates[0] || !dates[1]) return 0; // Si no hay fechas seleccionadas, retorna 0
+  
+    // Calcula el número de noches excluyendo el día de salida
+    const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
+  
+    let total = 0;
+  
+    // Calcular el total de las noches
+    for (let i = 0; i < numberOfNights; i++) {
+      const currentDay = new Date(dates[0]);
+      currentDay.setDate(currentDay.getDate() + i);
+  
+      // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
+      if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
+        // Lunes a Jueves
+        total += cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday) : 0;
+      } else {
+        // Viernes a Domingo
+        total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
+      }
     }
-  }
-
-  // Agregar cargos adicionales si existen
-  const clearCharge = cabin.clear ? Number(cabin.clear) : 0;  // Costo adicional por limpieza
-  const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0;  // Costo adicional por garantía
-
-  // Sumar los cargos adicionales al total
-  total += clearCharge + garantiaCharge;
-
-  return total; // Total base sin IGV
-};
-
-const numberOfNights = Math.round((dates[1] - dates[0]) / (1000 * 60 * 60 * 24));
+  
+    // Agregar cargos adicionales si existen
+    const clearCharge = cabin.clear ? Number(cabin.clear) : 0; // Costo adicional por limpieza
+    const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0; // Costo adicional por garantía
+  
+    // Sumar los cargos adicionales al total
+    total += clearCharge + garantiaCharge;
+  
+    return total; // Retorna el total calculado
+  };
+    
+  const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
 
 
   const tileClassName = ({ date, view }) => {
@@ -157,12 +168,12 @@ const numberOfNights = Math.round((dates[1] - dates[0]) / (1000 * 60 * 60 * 24))
   const tileDisabled = ({ date, view }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Elimina la hora para comparar solo la fecha
-
+  
     // Deshabilita fechas antes de hoy
     if (date < today) {
       return true;
     }
-
+  
     // Deshabilita fechas ya reservadas
     if (view === "month" && data?.reservations) {
       const isReserved = data.reservations.some((reservation) => {
@@ -172,14 +183,15 @@ const numberOfNights = Math.round((dates[1] - dates[0]) / (1000 * 60 * 60 * 24))
       });
       if (isReserved) return true;
     }
-
-    // Deshabilita fechas anteriores a la fecha de ingreso seleccionada
-    if (dates[0] && date < dates[0]) {
-      return false;
+  
+    // Deshabilita la misma fecha seleccionada como Check-In
+    if (checkInDate && date.getTime() === checkInDate.getTime()) {
+      return true;
     }
-
+  
     return false;
   };
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleGuestChange = (type, operation) => {
     setGuests((prevGuests) => {
@@ -333,10 +345,9 @@ const numberOfNights = Math.round((dates[1] - dates[0]) / (1000 * 60 * 60 * 24))
                 tileClassName={tileClassName}
                 tileDisabled={tileDisabled}
               />
-               {/* Nota para estancia de una noche */}
-              <p className="text-sm text-gray-500 mt-2">
-                Nota: Si desea reservar solo una noche, seleccione la misma fecha de entrada y salida.
-              </p>
+              <div className="mt-2">
+                {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+              </div>
 
               {/* Mostrar fechas de ingreso y salida */}
               <div className="mt-4 flex justify-between">
