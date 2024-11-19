@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 const Reservas = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [openModal, setOpenModal] = useState(false);
-  const [isActive, setIsActive] = useState(1);
+  const [isActive, setIsActive] = useState(0);
   const [selectedUser, setSelectedUser] = useState('');
   const { data, loading, error } = useFetch("reservation-admin");
   const [help, setHelpers] = useState([]);
@@ -101,6 +101,14 @@ const Reservas = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!selectedUser || !selectedPackage || selectedCottage.length === 0 || !dateStart || !dateEnd || total === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Todos los campos son obligatorios. Por favor, verifica la información ingresada.',
+      });
+      return; // Detener la ejecución si falta algún campo
+    }
     let data = {
       user_id: selectedUser,
       package_id: selectedPackage.id,
