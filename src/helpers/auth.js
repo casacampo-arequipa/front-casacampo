@@ -14,7 +14,7 @@ export const setUserData = (user) => {
   if (user) {
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(user), SECRET_KEY).toString();
     localStorage.setItem(USER_DATA, encryptedData);
-    console.log("Datos de usuario cifrados y guardados en localStorage.");
+
   }
 };
 

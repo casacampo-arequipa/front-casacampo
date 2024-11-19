@@ -26,7 +26,7 @@ const Login = () => {
         setToken(resp.data.token.access_token);
         setUserData(resp.data.user)
         if (getUserData().role == "Admin") {
-          console.log(getUserData().role)
+         
           nav("/dashboard");
         } else {
           nav("/");

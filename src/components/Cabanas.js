@@ -55,7 +55,7 @@ const Cabanas = () => {
               Authorization: `Bearer ${token()}`, // Añade el token al header
             }
           }
-        ).then((resp) => { console.log(resp) });
+        );
 
         alert("Información guardada exitosamente");
         setOpenModal(false);
@@ -74,7 +74,7 @@ const Cabanas = () => {
               Authorization: `Bearer ${token()}`, // Añade el token al header
             }
           }
-        ).then((resp) => { console.log(resp) });
+        );
 
         alert("Información guardada exitosamente");
         setOpenModal(false);
@@ -97,7 +97,7 @@ const Cabanas = () => {
             Authorization: `Bearer ${token()}`, // Añade el token al header
           }
         }
-      ).then((resp) => { console.log(resp) });
+      );
 
       alert("Información eliminada exitosamente");
       setOpenModal(false);

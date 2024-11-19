@@ -43,7 +43,7 @@ const CabinDetail = ({ max_person, }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const cabin = location.state?.cabin || {};
-  console.log(cabin);
+
   const [dates, setDates] = useState([new Date(), new Date()]);
   const [checkInDate, setCheckInDate] = useState(null);
   const [checkOutDate, setCheckOutDate] = useState(null);
@@ -72,7 +72,7 @@ const CabinDetail = ({ max_person, }) => {
         })
     }
   }, [])
-  console.log(data)
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);

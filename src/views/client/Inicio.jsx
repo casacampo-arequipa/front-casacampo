@@ -167,9 +167,7 @@ export default function Inicio() {
       description: translations.piscina_description,
     },
   ];
-  if (data && data.packeges) {
-    console.log(data.packeges);
-  }
+
 
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription);

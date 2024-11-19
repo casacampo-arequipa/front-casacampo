@@ -11,7 +11,7 @@ const CabinCards = ({ packageId, max_person, name, description }) => {
   const sectionRef = useRef(null);
   const [data, setData] = useState()
   const [error, setError] = useState()
-  console.log(max_person)
+
   useEffect(() => {
     if (packageId) {
       axios.get(`${API_URL}/cottage`, { params: { package_id: packageId } })
