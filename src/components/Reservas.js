@@ -59,9 +59,14 @@ const Reservas = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const calculateTotal = () => {
+    if (!dateStart || !dateEnd || !selectedPackage) return;
+
     const startDate = new Date(dateStart + 'T00:00:00');
     const endDate = new Date(dateEnd + 'T00:00:00');
     const oneDay = 24 * 60 * 60 * 1000; // Milisegundos en un día
+
+    // Excluir el día de salida
+    const adjustedEndDate = new Date(endDate.getTime() - oneDay);
 
     let currentDate = new Date(startDate);
 
@@ -70,8 +75,8 @@ const Reservas = () => {
 
     let totalPrice = cleaningPrice + guaranteePrice;
 
-
-    while (currentDate <= endDate) {
+    // Recorrer solo las noches
+    while (currentDate <= adjustedEndDate) {
       const day = currentDate.getDay(); // 0: Domingo, 1: Lunes, ..., 6: Sábado
       console.log(day);
       if (day >= 1 && day <= 4) {
@@ -87,6 +92,7 @@ const Reservas = () => {
 
     setTotal(totalPrice.toFixed(2)); // Redondear a 2 decimales
   };
+
 
 
   const handleDateStartChange = (e) => {
@@ -452,7 +458,7 @@ const Reservas = () => {
                     value={dateEnd}
                     onChange={(e) => {
                       setDateEnd(e.target.value);
-                      calculateTotal(); // Llamamos a la función inmediatamente después de actualizar el estado
+                      // Llamamos a la función inmediatamente después de actualizar el estado
                     }}
                     placeholder="Fecha de salida"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
