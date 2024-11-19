@@ -215,7 +215,7 @@ export default function Inicio() {
                   </div>
                   <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center text-center text-white opacity-0 group-hover:opacity-100 transition duration-500 p-4">
                     <h4 className="text-lg font-bold">{service.name}</h4>
-                    <p className="text-sm">Capacidad: {service.max_person} personas</p>
+                    <p className="text-sm">Ingreso para {service.max_person} personas Maximo  </p>
                     <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday} / noche</p>
                     <p className="text-sm">Precio (Viernes y Domingo): S/.{service.price_friday_to_sunday} / noche</p>
                     <p className="text-sm">"NO INCLUYE FERIADOS NI FECHAS ESPECIALES"</p>
@@ -252,7 +252,7 @@ export default function Inicio() {
                         <div className="flex flex-col md:flex-row justify-center items-center gap-6">
                           <div className="flex items-center gap-2 text-lg text-gray-600">
                             <FaUsers className="text-green-600" />
-                            <span>Capacidad: {selectedPackage.max_person} personas</span>
+                            <span>Ingreso: {selectedPackage.max_person} personas</span>
                           </div>
                           <div className="flex items-center gap-2 text-lg text-gray-600">
                             <FaMoneyBillWave className="text-green-600" />
@@ -260,13 +260,13 @@ export default function Inicio() {
                           </div>
                           <div className="flex items-center gap-2 text-lg text-gray-600">
                             <FaMoneyBillWave className="text-green-600" />
-                            <span>Precio (Viernes a Domingo): S/.{selectedPackage.price_friday_to_sunday} / noche</span>
+                            <span>Precio (Viernes y Domingo): S/.{selectedPackage.price_friday_to_sunday} / noche</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Componente CabinCards que muestra las cabañas */}
-                      <CabinCards name={selectedPackage.name} max_person={selectedPackage.max_person} packageId={selectedPackage.id} />
+                      <CabinCards description={selectedPackage.description} name={selectedPackage.name} max_person={selectedPackage.max_person} packageId={selectedPackage.id} />
                     </div>
                   )}
                 </Modal.Body>

@@ -9,7 +9,7 @@ import { FaUser } from "react-icons/fa";
 import { API_URL } from "../../env";
 
 
-const CabinDetail = ({ max_person }) => {
+const CabinDetail = ({ max_person, }) => {
   const comments = [
     {
       author: "Juan Pérez",
@@ -224,7 +224,7 @@ const CabinDetail = ({ max_person }) => {
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
               <h2 className="text-xl font-semibold mb-4">Recuerde</h2>
               <p className="text-gray-700 mb-4">
-                Tome en cuenta la capacidad de <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas del paquete al reservar esta cabaña.
+                Tome en cuenta la capacidad de ingreso de <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas al lugar
               </p>
               <button
                 onClick={() => setShowInitialPopup(false)} // Botón para cerrar el popup
@@ -243,29 +243,44 @@ const CabinDetail = ({ max_person }) => {
               className="w-full h-auto object-cover rounded-lg shadow-lg"
             />
             <div className="my-12">
-              <h1 className="text-3xl font-bold ">{cabin.name_cottage}</h1>
+              <h1 className="text-3xl font-bold">{cabin.name_cottage}</h1>
               <div className="flex flex-row">
-              <p className="text-gray-600">
-                Capacidad <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas
-              </p>
+                <p className="text-gray-600">
+                  Ingreso para <span className="font-bold">{cabin.max_person ? cabin.max_person : ""}</span> Personas al lugar
+                </p>
               </div>
-              <p className="text-gray-800 my-12">
-                {cabin.description}
+              <p className="text-gray-800 my-12">{cabin.description ? cabin.description : "No hay descripcion"}</p>
+
+              <p className="text-blue-600 underline cursor-pointer hover:text-blue-800">
+                <a 
+                  href="https://youtu.be/t-dIbIOie8U?si=_bpAI3P_59Z9uhCQ" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  Video Recorrido del interior
+                </a>
               </p>
+
               <div className="text-gray-600 mt-4">
-  <h2 className="text-2xl text-black font-bold mb-2">INDICACIONES:</h2>
+                <h2 className="text-2xl text-black font-bold mb-2">INDICACIONES:</h2>
 
-  <p><strong>Check In:</strong> <span className="font-bold">Desde las 11 am</span></p>
-  <p><strong>Check Out:</strong> <span className="font-bold">9 am (hora exacta)</span></p>
-  <p className="mt-2">
-    <strong>Tarifa de limpieza:</strong> S/. {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
-  </p>
-  <p>
-    <strong>Garantía:</strong> S/. {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantía se hará devolución, pero se podría deducir en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
-  </p>
-</div>
-
+                <p>
+                  <strong>Check In:</strong> <span className="font-bold">Desde las 11 am</span>
+                </p>
+                <p>
+                  <strong>Check Out:</strong> <span className="font-bold">9 am (hora exacta)</span>
+                </p>
+                <p className="mt-2">
+                  <strong>Tarifa de limpieza:</strong> S/.{" "}
+                  {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
+                </p>
+                <p>
+                  <strong>Garantía:</strong> S/.{" "}
+                  {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantía se hará devolución, pero se podría deducir en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
+                </p>
+              </div>
             </div>
+
           </div>
 
           <div className="md:w-1/2 flex flex-col space-y-4 font-lato">

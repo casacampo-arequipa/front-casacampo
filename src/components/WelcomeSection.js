@@ -120,13 +120,24 @@ const WelcomeSection = () => {
                 {slide.text} {/* Usar el texto traducido y capitalizado */}
               </p>
               <button
-                onClick={() => scrollToSection("cabins")}
+                onClick={() => window.open("https://youtu.be/kCB0TC7RuXw?si=fJDFNdhNF0at4G-g", "_blank")}
                 className="mt-8 px-8 py-4 bg-emerald-800 hover:bg-orange-800 text-white font-bold rounded-full text-xl"
               >
                 {translations.reservas}
               </button>
+              <p className="mt-6 text-lg md:text-xl font-serif">
+                <a 
+                  href="https://www.youtube.com/@CasaCampoArequipa" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className=" hover:text-orange-800 font-bold underline"
+                >
+                  Más videos
+                </a>
+              </p>
             </div>
           </div>
+
         </div>
       ))}
 

@@ -6,7 +6,7 @@ import { LanguageContext } from "./LanguageContext";
 import axios from "axios";
 import { API_URL } from "../env";
 
-const CabinCards = ({ packageId, max_person, name }) => {
+const CabinCards = ({ packageId, max_person, name, description }) => {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
   const [data, setData] = useState()
@@ -54,6 +54,7 @@ const CabinCards = ({ packageId, max_person, name }) => {
                 description: cottage.description,
                 max_person: max_person,
                 name: name,
+                description: description,
                 price_monday_to_thursday: cottage.price_monday_to_thursday,
                 price_friday_to_sunday: cottage.price_friday_to_sunday,
               })
