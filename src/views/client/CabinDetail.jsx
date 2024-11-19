@@ -248,10 +248,17 @@ const CabinDetail = ({ max_person, }) => {
   const { translations, setCurrentView } = useContext(LanguageContext);
 
   useEffect(() => {
-    setCurrentView("CabinDetail"); // Cambia "MyComponent" por el nombre de tu componente
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setCurrentView("CabinDetail");
   }, []);
 
+  useEffect(() => {
+    // Si los datos no están definidos, intenta recuperarlos del estado de navegación
+    if (!cabin && location.state) {
+      const { cabin: stateCabin, dates: stateDates, guests: stateGuests } = location.state;
+      setDates(stateDates || [new Date(), new Date()]);
+      setGuests(stateGuests || { adults: 1, children: 0, babies: 0 });
+    }
+  }, [location.state]);
   
 
   const handleCloseModal = () => {
