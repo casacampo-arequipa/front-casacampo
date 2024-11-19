@@ -25,6 +25,7 @@ import 'primeicons/primeicons.css';
 import Package from "./components/Package";
 import Galeria from "./components/Galeria"; // Importa el componente Galeria
 import { HashRouter as Router } from "react-router-dom";
+import { UserProvider } from "./contexts/UserContext";
 
 
 
@@ -57,7 +58,7 @@ function App() {
   }, []);
 
   return (
-    
+    <UserProvider>
     <LanguageProvider>
       <Router>
         <div className="App">
@@ -112,6 +113,7 @@ function App() {
         </div>
       </Router>
     </LanguageProvider>
+    </UserProvider>
   );
 }
 

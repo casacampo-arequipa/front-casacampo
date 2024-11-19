@@ -1,18 +1,16 @@
-// src/pages/Login.js
-
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/logo-arequipa-remove.png"; // Ensure the path is correct
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import logo from "../assets/logo-arequipa-remove.png"; // Asegúrate de que la ruta sea correcta
 import axios from "axios";
 import { API_URL } from "../env";
-import { getUserData, setToken } from "../helpers/auth";
-import { setUserData } from "../helpers/auth";
+import { getUserData, setToken, setUserData } from "../helpers/auth";
+import { useUser } from "../contexts/UserContext";
 
 const Login = () => {
-  const nav = useNavigate();
+  const { setUser } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation(); // Hook para obtener la página previa
   const [error, setError] = useState();
-
-  const navigate = useNavigate(); // Hook for navigation
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,22 +18,30 @@ const Login = () => {
       email: e.target.email.value,
       password: e.target.password.value,
     };
+
     axios
       .post(`${API_URL}/auth/login`, data)
       .then((resp) => {
+        setUser(resp.data.user);
         setToken(resp.data.token.access_token);
-        setUserData(resp.data.user)
-        if (getUserData().role == "Admin") {
-         
-          nav("/dashboard");
+        setUserData(resp.data.user);
+
+        const { from, cabin, dates, guests } = location.state || {}; // Recupera los datos previos
+
+        if (from) {
+          // Redirige a la página previa con los datos previos
+          navigate(from, { state: { cabin, dates, guests } });
         } else {
-          nav("/");
+          // Redirige según el rol del usuario
+          const role = getUserData().role;
+          navigate(role === "Admin" ? "/dashboard" : "/");
         }
-        
-        alert("Usuario Logeado");
+
+        alert("Usuario Logueado");
       })
       .catch((error) => {
-        setError(error);
+        setError("Credenciales inválidas. Intenta nuevamente.");
+        console.error(error);
       });
   };
 
@@ -54,6 +60,7 @@ const Login = () => {
             <input
               type="email"
               id="email"
+              name="email"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             />
@@ -65,6 +72,7 @@ const Login = () => {
             <input
               type="password"
               id="password"
+              name="password"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             />
@@ -76,6 +84,7 @@ const Login = () => {
             Iniciar Sesión
           </button>
         </form>
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         <p className="mt-4 text-center">
           ¿No tienes una cuenta?{" "}
           <Link to="/register" className="text-blue-500">

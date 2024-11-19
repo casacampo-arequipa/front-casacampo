@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import axios from "axios"
 import { LanguageContext } from "../../components/LanguageContext";
+import { UserContext } from "../../contexts/UserContext";
 import ColoredSection from "../../components/Section/ColoredSection";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { FaUser } from "react-icons/fa";
@@ -38,6 +39,7 @@ const CabinDetail = ({ max_person, }) => {
     },
   ];
 
+  const { user } = useContext(UserContext); 
   const [showModal, setShowModal] = useState(false);
   const [showInitialPopup, setShowInitialPopup] = useState(true);
   const location = useLocation();
@@ -78,50 +80,62 @@ const CabinDetail = ({ max_person, }) => {
   }, []);
 
   const handleDateChange = (selectedDates) => {
-    if (selectedDates.length === 1) {
-      // Cuando se selecciona una sola fecha, asignar check-in a esa fecha y check-out al día siguiente
-      setDates([selectedDates[0], new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000)]);
-      setCheckInDate(selectedDates[0]);
-      setCheckOutDate(new Date(selectedDates[0].getTime() + 24 * 60 * 60 * 1000));
+    if (selectedDates.length === 2) {
+      const [checkIn, checkOut] = selectedDates;
+  
+      // Validar que Check-Out no sea igual a Check-In
+      if (checkIn.toDateString() === checkOut.toDateString()) {
+        setErrorMessage("Debes seleccionar al menos una noche para la reserva.");
+        return;
+      }
+  
+      // Si la validación pasa, actualiza los estados
+      setDates(selectedDates);
+      setCheckInDate(checkIn);
+      setCheckOutDate(checkOut);
+      setErrorMessage(""); // Limpia cualquier mensaje de error
     } else {
-      // Cuando se seleccionan dos fechas, asignar check-in a la primera fecha y check-out al día siguiente de la última fecha
-      setDates([selectedDates[0], selectedDates[1]]);
+      setDates([selectedDates[0], null]); // Selección inicial
       setCheckInDate(selectedDates[0]);
-      setCheckOutDate(new Date(selectedDates[1].getTime() + 24 * 60 * 60 * 1000));
+      setCheckOutDate(null);
     }
   };
 
   const calculateTotal = () => {
-  const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
-
-  let total = 0;
-
-  // Calcular el total de las noches
-  for (let i = 0; i < numberOfNights; i++) {
-    const currentDay = new Date(dates[0]);
-    currentDay.setDate(currentDay.getDate() + i);
-
-    // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
-    if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
-      // Lunes a Jueves
-      total += cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday) : 0;
-    } else {
-      // Viernes a Domingo
-      total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
+    if (!dates[0] || !dates[1]) return 0; // Si no hay fechas seleccionadas, retorna 0
+  
+    // Calcula el número de noches excluyendo el día de salida
+    const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
+  
+    let total = 0;
+  
+    // Calcular el total de las noches
+    for (let i = 0; i < numberOfNights; i++) {
+      const currentDay = new Date(dates[0]);
+      currentDay.setDate(currentDay.getDate() + i);
+  
+      // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
+      if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
+        // Lunes a Jueves
+        total += cabin.price_monday_to_thursday ? Number(cabin.price_monday_to_thursday) : 0;
+      } else {
+        // Viernes a Domingo
+        total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
+      }
     }
-  }
+  
+    // Agregar cargos adicionales si existen
+    const clearCharge = cabin.clear ? Number(cabin.clear) : 0; // Costo adicional por limpieza
+    const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0; // Costo adicional por garantía
+  
+    // Sumar los cargos adicionales al total
+    total += clearCharge + garantiaCharge;
+  
+    return total; // Retorna el total calculado
+  };
+    
+  const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
 
-  // Agregar cargos adicionales si existen
-  const clearCharge = cabin.clear ? Number(cabin.clear) : 0;  // Costo adicional por limpieza
-  const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0;  // Costo adicional por garantía
-
-  // Sumar los cargos adicionales al total
-  total += clearCharge + garantiaCharge;
-
-  return total; // Total base sin IGV
-};
-
-  const numberOfNights = (dates[1] - dates[0]) / (1000 * 60 * 60 * 24);
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
@@ -154,12 +168,12 @@ const CabinDetail = ({ max_person, }) => {
   const tileDisabled = ({ date, view }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Elimina la hora para comparar solo la fecha
-
+  
     // Deshabilita fechas antes de hoy
     if (date < today) {
       return true;
     }
-
+  
     // Deshabilita fechas ya reservadas
     if (view === "month" && data?.reservations) {
       const isReserved = data.reservations.some((reservation) => {
@@ -169,14 +183,15 @@ const CabinDetail = ({ max_person, }) => {
       });
       if (isReserved) return true;
     }
-
-    // Deshabilita fechas anteriores a la fecha de ingreso seleccionada
-    if (dates[0] && date < dates[0]) {
-      return false;
+  
+    // Deshabilita la misma fecha seleccionada como Check-In
+    if (checkInDate && date.getTime() === checkInDate.getTime()) {
+      return true;
     }
-
+  
     return false;
   };
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleGuestChange = (type, operation) => {
     setGuests((prevGuests) => {
@@ -191,24 +206,66 @@ const CabinDetail = ({ max_person, }) => {
   };
 
   const proceedToPayment = () => {
+    if (!user) {
+      navigate("/login", {
+        state: {
+          from: "/cabin-detail",
+          cabin,
+          dates,
+          guests,
+          clear: cabin.clear,
+          garantia: cabin.garantia,
+          checkInDate,
+          checkOutDate,
+          totalNights: numberOfNights, // Total de noches
+          priceMondayThursday: cabin.price_monday_to_thursday,
+          priceFridaySunday: cabin.price_friday_to_sunday,
+        },
+      });
+      return;
+    }
+  
     const total = calculateTotal();
-    navigate("/pago", { state: { dates, guests, total } });
+    navigate("/pago", {
+      state: {
+        cabin,
+        dates,
+        guests,
+        total,
+        clear: cabin.clear,
+        garantia: cabin.garantia,
+        checkInDate,
+        checkOutDate,
+        totalNights: numberOfNights, // Total de noches
+        priceMondayThursday: cabin.price_monday_to_thursday,
+        priceFridaySunday: cabin.price_friday_to_sunday,
+      },
+    });
   };
+  
+  
 
   const { translations, setCurrentView } = useContext(LanguageContext);
 
   useEffect(() => {
-    setCurrentView("CabinDetail"); // Cambia "MyComponent" por el nombre de tu componente
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setCurrentView("CabinDetail");
   }, []);
 
-  const handleReservation = () => {
-    setShowModal(true); // Muestra el modal
-  };
+  useEffect(() => {
+    // Si los datos no están definidos, intenta recuperarlos del estado de navegación
+    if (!cabin && location.state) {
+      const { cabin: stateCabin, dates: stateDates, guests: stateGuests } = location.state;
+      setDates(stateDates || [new Date(), new Date()]);
+      setGuests(stateGuests || { adults: 1, children: 0, babies: 0 });
+    }
+  }, [location.state]);
+  
 
   const handleCloseModal = () => {
     setShowModal(false); // Cierra el modal
   };
+
+  
 
   return (
     <ColoredSection>
@@ -295,10 +352,9 @@ const CabinDetail = ({ max_person, }) => {
                 tileClassName={tileClassName}
                 tileDisabled={tileDisabled}
               />
-               {/* Nota para estancia de una noche */}
-              <p className="text-sm text-gray-500 mt-2">
-                Nota: Si desea reservar solo una noche, seleccione la misma fecha de entrada y salida.
-              </p>
+              <div className="mt-2">
+                {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+              </div>
 
               {/* Mostrar fechas de ingreso y salida */}
               <div className="mt-4 flex justify-between">
@@ -456,8 +512,8 @@ const CabinDetail = ({ max_person, }) => {
               </div>
 
               <button
-                onClick={handleReservation}
                 className="mt-4 text-black border px-4 py-2 rounded-lg hover:bg-red-700 hover:text-white"
+                onClick={proceedToPayment}
               >
                 {translations.reservar}
               </button>
@@ -514,53 +570,7 @@ const CabinDetail = ({ max_person, }) => {
       </div>
     </div>
   </div>
-</div>
-                 {/* Modal */}
-                 {showModal && (
-  <div
-    className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-    onClick={handleCloseModal} // Cierra el modal al hacer clic en el fondo
-  >
-    <div
-      className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
-      onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el modal
-    >
-      <button
-        onClick={handleCloseModal}
-        className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
-        aria-label="Cerrar"
-      >
-        <i className="fa fa-times text-xl"></i>
-      </button>
-      
-      <h2 className="text-xl font-semibold mb-4">Reservas</h2>
-      <p className="mb-4">
-        Las reservas se gestionan exclusivamente a través de nuestro WhatsApp. Por favor, envíenos una captura de las fechas para confirmar su reserva, e indíquenos el paquete y la cabaña seleccionada.
-      </p>
-      
-      <a
-  href={`https://api.whatsapp.com/send?phone=51987563711&text=${encodeURIComponent(
-    `Hola, deseo reservar la cabaña "${cabin.name_cottage}".\n` +
-    `- Check-In: ${checkInDate ? checkInDate.toLocaleDateString() : "No especificado"}\n` +
-    `- Check-Out: ${checkOutDate ? checkOutDate.toLocaleDateString() : "No especificado"}\n` +
-    `- Paquete seleccionado: ${cabin.name}\n` +
-    `- Total a pagar: S/. ${calculateTotal().toFixed(2)}\n` +
-    `- Detalle de huéspedes:\n` +
-    `  * Adultos: ${guests.adults}\n` +   `  * Niños: ${guests.children}\n` +
-    `  * Bebés: ${guests.babies}\n` +
-    `Por favor, confirmen mi reserva. ¡Gracias!`
-  )}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center"
->
-        <i className="fab fa-whatsapp mr-2"></i> {/* Ícono de WhatsApp */}
-        Contactar por WhatsApp
-      </a>
-    </div>
-  </div>
-)}
-
+</div>               
       </div>
     </ColoredSection>
   );
