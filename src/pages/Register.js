@@ -7,38 +7,55 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo-arequipa-remove.png'; // Asegúrate de que la ruta del logo sea correcta
 import { API_URL } from '../env';
+import Swal from 'sweetalert2';
 
 const Register = () => {
   const navigate = useNavigate();
-
   const countries = getNames().map((country) => ({ value: country, label: country }));
-
-  // Form state
-
-
-  // Error handling state
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [errors, setErrors] = useState([]);
-
-
-
-
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     let data = {
+      name: e.target.name.value,
+      lastname: e.target.lastname.value,
       email: e.target.email.value,
+      phone: e.target.phone.value,
+      country: selectedCountry, // Usar el país seleccionado
       password: e.target.password.value,
-    }
+      password_confirmation: e.target.password_confirmation.value,
+    };
     try {
       const response = await axios.post(`${API_URL}/auth/register`, data);
 
       if (response.status === 201) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Usuario Registrado correctamente"
+        });
         navigate('/login');
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        // Set validation errors
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al guardar los datos',
+          text: 'Ocurrió un error inesperado.',
+        });
+        console.log(error)
         setErrors(error.response.data.errors || []);
       } else {
         // Handle other errors
@@ -56,23 +73,21 @@ const Register = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">Registrarse</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="firstName" className="block text-gray-700">Nombre Completo</label>
+            <label htmlFor="name" className="block text-gray-700">Nombre Completo</label>
             <input
               type="text"
               id="name"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="lastName" className="block text-gray-700">Apellidos</label>
+            <label htmlFor="lastname" className="block text-gray-700">Apellidos</label>
             <input
               type="text"
               id="lastname"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-
             />
           </div>
           <div className="mb-4">
@@ -85,13 +100,12 @@ const Register = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="address" className="block text-gray-700">Correo</label>
+            <label htmlFor="email" className="block text-gray-700">Correo</label>
             <input
               type="email"
               id="email"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-
             />
           </div>
           <div className="mb-4">
@@ -99,19 +113,9 @@ const Register = () => {
             <Select
               options={countries}
               placeholder="Selecciona tu país"
+              onChange={(selectedOption) => setSelectedCountry(selectedOption.value)} // Captura el nombre del país
             />
           </div>
-          {/* <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">Usuario</label>
-            <input
-              type="text"
-              id="user"
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-              value={formData.user}
-              onChange={handleInputChange}
-            />
-          </div> */}
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700">Contraseña</label>
             <input
@@ -122,9 +126,9 @@ const Register = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-gray-700">Confirmar Contraseña</label>
+            <label htmlFor="password_confirmation" className="block text-gray-700">Confirmar Contraseña</label>
             <input
-              type="password_confirmation"
+              type="password"
               id="password_confirmation"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
