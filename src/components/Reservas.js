@@ -5,6 +5,7 @@ import { Button, Card, Modal } from 'flowbite-react';
 import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
+import Swal from 'sweetalert2';
 
 const Reservas = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -146,12 +147,51 @@ const Reservas = () => {
       setOpenModal(false);
       window.location.reload();
     } catch (error) {
-      console.error("Error al guardar los datos:", error);
-      alert("Hubo un error al guardar los datos");
-    }
-    // }
+      if (error.response && error.response.data) {
+        const errorData = error.response.data; // Acceder a los datos del error
+        console.log(errorData); // Para depuración
 
-  };
+        let errorMessage = 'Ocurrió un error inesperado.';
+
+        // Verificar si el error está en formato JSON
+        try {
+          const parsedError = typeof errorData === 'string' ? JSON.parse(errorData) : errorData;
+
+          // Caso 1: Error específico con campos como `date_start` o `cottage_ids`
+          if (parsedError['date_start']) {
+            errorMessage = 'La fecha de inicio debe ser una fecha posterior al día de hoy.';
+          } else if (parsedError['cottage_ids']) {
+            errorMessage = 'Debes seleccionar al menos una cabaña.';
+          }
+
+          // Caso 2: Error general con `message`
+          if (parsedError.message) {
+            errorMessage = parsedError.message;
+          }
+        } catch (parseError) {
+          // Si no es un JSON válido, manejarlo como texto plano
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        }
+
+        // Mostrar mensaje de error con SweetAlert
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al guardar los datos',
+          text: errorMessage,
+        });
+      } else {
+        // Caso genérico si no hay datos en la respuesta
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al guardar los datos',
+          text: 'Ocurrió un error inesperado.',
+        });
+      }
+    }
+
+  }
 
   return (
     <Card>
@@ -361,8 +401,8 @@ const Reservas = () => {
                     <div
                       key={cottage.id}
                       className={`cursor-pointer border rounded-lg shadow-sm p-4 flex flex-col items-center transition duration-300 ease-in-out ${selectedCottage.includes(cottage.id)
-                          ? 'border-blue-500 shadow-lg bg-blue-100'
-                          : 'border-gray-300'
+                        ? 'border-blue-500 shadow-lg bg-blue-100'
+                        : 'border-gray-300'
                         }`}
                       onClick={() => toggleCottageSelection(cottage.id)} // Permite seleccionar o deseleccionar
                     >
