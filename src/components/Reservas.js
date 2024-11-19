@@ -327,7 +327,7 @@ const Reservas = () => {
               </div>
 
               <div className="flex flex-col space-y-4">
-                {/* Otros campos */}
+                {/* Selección de paquete */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Selección un paquete
@@ -444,13 +444,15 @@ const Reservas = () => {
                     name="date_start"
                     value={dateStart}
                     onChange={handleDateStartChange}
-                    placeholder="Precio de limpieza"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Check in"
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${!selectedPackage ? "bg-gray-200 cursor-not-allowed" : ""
+                      }`}
+                    disabled={!selectedPackage} // Deshabilitar si no hay paquete seleccionado
                   />
                 </div>
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700">
-                    Chek out
+                    Check out
                   </label>
                   <input
                     type="date"
@@ -458,16 +460,21 @@ const Reservas = () => {
                     value={dateEnd}
                     onChange={(e) => {
                       setDateEnd(e.target.value);
-                      // Llamamos a la función inmediatamente después de actualizar el estado
                     }}
-                    placeholder="Fecha de salida"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Check out"
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${!selectedPackage ? "bg-gray-200 cursor-not-allowed" : ""
+                      }`}
+                    disabled={!selectedPackage} // Deshabilitar si no hay paquete seleccionado
                   />
                 </div>
                 <button
                   type="button"
-                  className="mt-5 px-2 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-1/2"
+                  className={`mt-5 px-2 py-2 text-white rounded-md w-1/2 ${!selectedPackage
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                    }`}
                   onClick={calculateTotal}
+                  disabled={!selectedPackage} // Deshabilitar si no hay paquete seleccionado
                 >
                   Calcular Total
                 </button>

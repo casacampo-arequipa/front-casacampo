@@ -6,6 +6,7 @@ import { getNames } from 'country-list';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo-arequipa-remove.png'; // Asegúrate de que la ruta del logo sea correcta
+import { API_URL } from '../env';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,43 +14,26 @@ const Register = () => {
   const countries = getNames().map((country) => ({ value: country, label: country }));
 
   // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    lastname: '',
-    phone: '',
-    email: '',
-    country: '',
-    user: '',
-    password: ''
-  });
+
 
   // Error handling state
   const [errors, setErrors] = useState([]);
 
-  // Handle input change
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value
-    });
-  };
 
-  const handleCountryChange = (selectedOption) => {
-    setFormData({
-      ...formData,
-      country: selectedOption.value
-    });
-  };
+
+
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    let data = {
+      email: e.target.email.value,
+      password: e.target.password.value,
+    }
     try {
-      const response = await axios.post('http://127.0.0.1:8000/users', formData);
+      const response = await axios.post(`${API_URL}/auth/register`, data);
 
       if (response.status === 201) {
-
         navigate('/login');
       }
     } catch (error) {
@@ -78,7 +62,7 @@ const Register = () => {
               id="name"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              onChange={handleInputChange}
+
             />
           </div>
           <div className="mb-4">
@@ -88,7 +72,7 @@ const Register = () => {
               id="lastname"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              onChange={handleInputChange}
+
             />
           </div>
           <div className="mb-4">
@@ -98,7 +82,6 @@ const Register = () => {
               id="phone"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              onChange={handleInputChange}
             />
           </div>
           <div className="mb-4">
@@ -108,14 +91,13 @@ const Register = () => {
               id="email"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              onChange={handleInputChange}
+
             />
           </div>
           <div className="mb-4">
             <label htmlFor="country" className="block text-gray-700">País</label>
             <Select
               options={countries}
-              onChange={handleCountryChange}
               placeholder="Selecciona tu país"
             />
           </div>
@@ -137,8 +119,6 @@ const Register = () => {
               id="password"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-
-              onChange={handleInputChange}
             />
           </div>
           <div className="mb-4">
@@ -148,7 +128,6 @@ const Register = () => {
               id="password_confirmation"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
-              onChange={handleInputChange}
             />
           </div>
           <button type="submit" className="w-full py-2 bg-blue-500 text-white font-bold rounded-md">Registrarse</button>

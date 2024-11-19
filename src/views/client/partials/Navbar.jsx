@@ -79,7 +79,7 @@ function Navbar() {
 
         {/* Menú desplegable en móvil */}
         {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 w-full bg-white shadow-lg z-10 sm:hidden">
+          <div className="absolute top-full left-0 w-full bg-white shadow-lg z-10 sm:hidden ">
             <ul className="flex flex-col divide-y text-black">
               <li className="px-4 py-2 hover:bg-gray-200">
                 <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
@@ -119,7 +119,7 @@ function Navbar() {
 
         {/* Menú de navegación para escritorio */}
         <div className="absolute top-12 left-0 right-0 hidden sm:flex justify-center text-sm">
-          <ul className="flex divide-x opacity-0 md:opacity-100 duration-300">
+          <ul className="flex divide-x opacity-0 md:opacity-100 duration-300 text-xl">
             <li
               className={`cursor-pointer px-2 rounded ${
                 isHomePage
