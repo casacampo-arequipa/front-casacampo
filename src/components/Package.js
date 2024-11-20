@@ -7,6 +7,7 @@ import CabinCards from './CabinCards';
 import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
+import Swal from 'sweetalert2';
 
 const Package = () => {
     const { data, loading, error } = useFetch("packages-admin");
@@ -63,9 +64,17 @@ const Package = () => {
                     }
                 );
 
-                alert("Información guardada exitosamente");
+                Swal.fire({
+                    title: "¡Buen trabajo!",
+                    text: "El paquete ha sido actualizado exitosamente.",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
+                });
                 setOpenModal(false);
-                window.location.reload();
             } catch (error) {
                 console.error("Error al guardar los datos:", error);
                 alert("Hubo un error al guardar los datos");
@@ -81,10 +90,17 @@ const Package = () => {
                         }
                     }
                 );
-
-                alert("Información guardada exitosamente");
                 setOpenModal(false);
-                window.location.reload();
+                Swal.fire({
+                    title: "¡Buen trabajo!",
+                    text: "El paquete ha sido creada exitosamente.",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
+                });
             } catch (error) {
                 console.error("Error al guardar los datos:", error);
                 alert("Hubo un error al guardar los datos");
@@ -95,22 +111,46 @@ const Package = () => {
     };
 
     const handledeleteClick = async (id) => {
-        try {
-            await axios.delete(
-                `${API_URL}/packages-admin/${id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token()}`, // Añade el token al header
+        const result = await Swal.fire({
+            title: "¿Estás seguro?",
+            text: "¡No podrás revertir esto!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminarlo",
+            cancelButtonText: "Cancelar"
+        });
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(
+                    `${API_URL}/packages-admin/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token()}`, // Añade el token al header
+                        }
                     }
-                }
-            );
+                );
 
-            alert("Información eliminada exitosamente");
-            setOpenModal(false);
-            window.location.reload();
-        } catch (error) {
-            console.error("Error al eliminar los datos:", error);
-            alert("Hubo un error al eliminadar los datos");
+                Swal.fire({
+                    title: "¡Eliminado!",
+                    text: "La información ha sido eliminada exitosamente.",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
+                });
+                setOpenModal(false);
+            } catch (error) {
+                console.error("Error al eliminar los datos:", error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un error al eliminar los datos.",
+                    icon: "error",
+                });
+            }
         }
     };
 

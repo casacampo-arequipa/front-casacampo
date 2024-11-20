@@ -7,6 +7,7 @@ import useFetch from '../useFetchAdmin';
 import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
+import Swal from 'sweetalert2';
 
 const Cabanas = () => {
   const [isTableView, setIsTableView] = useState(true);
@@ -42,9 +43,9 @@ const Cabanas = () => {
       rooms: e.target.rooms?.value,
       beds: e.target.beds?.value,
       bathrooms: e.target.bathrooms?.value,
-      
+
     }
-  
+
     if (selectedCottage) {
       try {
         await axios.put(
@@ -57,9 +58,18 @@ const Cabanas = () => {
           }
         );
 
-        alert("Información guardada exitosamente");
+        Swal.fire({
+          title: "¡Buen trabajo!",
+          text: "La cabaña ha sido actualizado exitosamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
         setOpenModal(false);
-        window.location.reload();
+        
       } catch (error) {
         console.error("Error al guardar los datos:", error);
         alert("Hubo un error al guardar los datos");
@@ -76,9 +86,19 @@ const Cabanas = () => {
           }
         );
 
-        alert("Información guardada exitosamente");
         setOpenModal(false);
-        window.location.reload();
+
+        Swal.fire({
+          title: "¡Buen trabajo!",
+          text: "La cabaña ha sido creada exitosamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+
       } catch (error) {
         console.error("Error al guardar los datos:", error);
         alert("Hubo un error al guardar los datos");
@@ -87,26 +107,60 @@ const Cabanas = () => {
 
   };
 
-
   const handledeleteClick = async (id) => {
-    try {
-      await axios.delete(
-        `${API_URL}/cottage-admin/${id}`,
-        {
+    // Mostrar la confirmación primero
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¡No podrás revertir esto!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminarlo",
+      cancelButtonText: "Cancelar"
+    });
+
+    // Si el usuario confirma, elimina el dato
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`${API_URL}/cottage-admin/${id}`, {
           headers: {
             Authorization: `Bearer ${token()}`, // Añade el token al header
-          }
-        }
-      );
+          },
+        });
 
-      alert("Información eliminada exitosamente");
-      setOpenModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error al eliminar los datos:", error);
-      alert("Hubo un error al eliminadar los datos");
+        // Notificar éxito
+        Swal.fire({
+          title: "¡Eliminado!",
+          text: "La información ha sido eliminada exitosamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+
+        // Actualizar estado o realizar lógica de limpieza
+        setOpenModal(false);
+        // Aquí puedes actualizar el estado de los datos localmente si no deseas recargar:
+        // setData(data.filter(item => item.id !== id));
+
+        // Recargar la página solo si es estrictamente necesario
+        // window.location.reload();
+      } catch (error) {
+        console.error("Error al eliminar los datos:", error);
+
+        // Notificar error
+        Swal.fire({
+          title: "Error",
+          text: "Hubo un error al eliminar los datos.",
+          icon: "error",
+        });
+      }
     }
   };
+
 
   return (
     <Card>

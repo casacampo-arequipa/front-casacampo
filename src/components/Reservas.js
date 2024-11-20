@@ -229,22 +229,46 @@ const Reservas = () => {
     }
   }
   const handledeleteClick = async (id) => {
-    try {
-      await axios.delete(
-        `${API_URL}/reservation-admin/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token()}`, // Añade el token al header
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¡No podrás revertir esto!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminarlo",
+      cancelButtonText: "Cancelar"
+    });
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(
+          `${API_URL}/reservation-admin/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token()}`, // Añade el token al header
+            }
           }
-        }
-      );
+        );
 
-      alert("Información eliminada exitosamente");
-      setOpenModal(false);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error al eliminar los datos:", error);
-      alert("Hubo un error al eliminadar los datos");
+        Swal.fire({
+          title: "¡Eliminado!",
+          text: "La información ha sido eliminada exitosamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+        setOpenModal(false);
+      } catch (error) {
+        console.error("Error al eliminar los datos:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Hubo un error al eliminar los datos.",
+          icon: "error",
+        });
+      }
     }
   };
 
@@ -280,40 +304,40 @@ const Reservas = () => {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {data?.reservations.map((cottage, index) => (
+            {data?.reservations?.map((cottage, index) => (
               <tr key={cottage.id} className="hover:bg-gray-100">
                 <td className="p-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                   {cottage.id}
                 </td>
                 <td className="p-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  {cottage.package.name}
+                  {cottage?.package?.name}
                 </td>
-                <td className="p-3">{cottage.cottages.length > 0 ? (
+                <td className="p-3">{cottage.cottages?.length > 0 ? (
                   <ul className="list-disc list-inside">
                     {cottage.cottages.map(cottage => (
-                      <li key={cottage.id}>{cottage.name_cottage}</li>
+                      <li key={cottage?.id}>{cottage?.name_cottage}</li>
                     ))}
                   </ul>
                 ) : (
                   <span>No hay cabañas asociadas</span>
                 )}</td>
                 <td className="p-3">
-                  {new Date(cottage.date_reservation).toISOString().split('T')[0]}
+                  {new Date(cottage?.date_reservation).toISOString().split('T')[0]}
                 </td>
                 <td className="p-3">
-                  <span style={{ color: cottage.state === 1 ? 'green' : 'red' }}>
-                    {cottage.state === 1 ? 'Pagado' : 'Falta pagar'}
+                  <span style={{ color: cottage?.state === 1 ? 'green' : 'red' }}>
+                    {cottage?.state === 1 ? 'Pagado' : 'Falta pagar'}
                   </span>
 
                 </td>
                 <td className="p-3">
-                  {new Date(cottage.date_start).toISOString().split('T')[0]}
+                  {new Date(cottage?.date_start).toISOString().split('T')[0]}
                 </td>
                 <td className="p-3">
-                  {new Date(cottage.date_end).toISOString().split('T')[0]}
+                  {new Date(cottage?.date_end).toISOString().split('T')[0]}
                 </td>
-                <td className="p-3">{cottage.package.max_person}</td>
-                <td className="p-3">{cottage.total_price}</td>
+                <td className="p-3">{cottage?.package?.max_person}</td>
+                <td className="p-3">{cottage?.total_price}</td>
                 {/* <td className="p-3 ">{cottage.description.length > 100
                   ? `${cottage.description.slice(0, 40)}...`
                   : cottage.description}</td> */}
