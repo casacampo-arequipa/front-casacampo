@@ -16,9 +16,11 @@ const Reservas = () => {
   const [help, setHelpers] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedCottage, setSelectedCottage] = useState([]);
+  const [selectedReservation, setSelectedReservation] = useState();
   const [dateStart, setDateStart] = useState('');
   const [dateEnd, setDateEnd] = useState('');
   const [total, setTotal] = useState(0);
+  const formatDate = (date) => new Date(date).toISOString().split('T')[0];
 
   const toggleCottageSelection = (cottageId) => {
     setSelectedCottage((prevSelected) => {
@@ -55,9 +57,29 @@ const Reservas = () => {
     setOpenModal(true);
   }
 
-
+  const handleEditClick = (reservation) => {
+    handelneed();
+    setSelectedReservation(reservation);
+    setSelectedPackage(reservation.package);
+    setSelectedCottage(reservation.cottages.map(c => c.id));
+    setDateStart(formatDate(reservation.date_start));
+    setDateEnd(formatDate(reservation.date_end));
+    setTotal(reservation.total_price);
+    setSelectedUser(reservation.user_id);
+    setIsActive(reservation.state);
+  }
+  console.log(dateStart)
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
+  const clearForm = () => {
+    setSelectedReservation(null);
+    setSelectedUser('');
+    setSelectedPackage(null);
+    setSelectedCottage([]);
+    setDateStart('');
+    setDateEnd('');
+    setTotal(0);
+    setIsActive(0);
+  };
   const calculateTotal = () => {
     if (!dateStart || !dateEnd || !selectedPackage) return;
 
@@ -126,30 +148,90 @@ const Reservas = () => {
       date_reservation: new Date().toISOString().split("T")[0],
     }
 
-    // if (selectedCottage) {
-    //   try {
-    //     await axios.put(
-    //       `${API_URL}/reservation-admin`,
-    //       data,
-    //       {
-    //         headers: {
-    //           Authorization: `Bearer ${token()}`, // Añade el token al header
-    //         }
-    //       }
-    //     );
+    if (selectedReservation) {
+      try {
+        await axios.put(
+          `${API_URL}/reservation-admin/${selectedReservation.id}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token()}`, // Añade el token al header
+            }
+          }
+        );
 
-    //     alert("Información guardada exitosamente");
-    //     setOpenModal(false);
-    //     window.location.reload();
-    //   } catch (error) {
-    //     console.error("Error al guardar los datos:", error);
-    //     alert("Hubo un error al guardar los datos");
-    //   }
-    // } else {
+        alert("Información actualizada exitosamente");
+        setOpenModal(false);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error al actualizar los datos:", error);
+        alert("Hubo un error al actualizar los datos");
+      }
+    } else {
+      try {
+        await axios.post(
+          `${API_URL}/reservation-admin`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token()}`, // Añade el token al header
+            }
+          }
+        );
+
+        alert("Información guardada exitosamente");
+        setOpenModal(false);
+        window.location.reload();
+      } catch (error) {
+        if (error.response && error.response.data) {
+          const errorData = error.response.data; // Acceder a los datos del error
+          console.log(errorData); // Para depuración
+
+          let errorMessage = 'Ocurrió un error inesperado.';
+
+          // Verificar si el error está en formato JSON
+          try {
+            const parsedError = typeof errorData === 'string' ? JSON.parse(errorData) : errorData;
+
+            // Caso 1: Error específico con campos como `date_start` o `cottage_ids`
+            if (parsedError['date_start']) {
+              errorMessage = 'La fecha de inicio debe ser una fecha posterior al día de hoy.';
+            } else if (parsedError['cottage_ids']) {
+              errorMessage = 'Debes seleccionar al menos una cabaña.';
+            }
+
+            // Caso 2: Error general con `message`
+            if (parsedError.message) {
+              errorMessage = parsedError.message;
+            }
+          } catch (parseError) {
+            // Si no es un JSON válido, manejarlo como texto plano
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            }
+          }
+
+          // Mostrar mensaje de error con SweetAlert
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar los datos',
+            text: errorMessage,
+          });
+        } else {
+          // Caso genérico si no hay datos en la respuesta
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar los datos',
+            text: 'Ocurrió un error inesperado.',
+          });
+        }
+      }
+    }
+  }
+  const handledeleteClick = async (id) => {
     try {
-      await axios.post(
-        `${API_URL}/reservation-admin`,
-        data,
+      await axios.delete(
+        `${API_URL}/reservation-admin/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token()}`, // Añade el token al header
@@ -157,55 +239,14 @@ const Reservas = () => {
         }
       );
 
-      alert("Información guardada exitosamente");
+      alert("Información eliminada exitosamente");
       setOpenModal(false);
       window.location.reload();
     } catch (error) {
-      if (error.response && error.response.data) {
-        const errorData = error.response.data; // Acceder a los datos del error
-        console.log(errorData); // Para depuración
-
-        let errorMessage = 'Ocurrió un error inesperado.';
-
-        // Verificar si el error está en formato JSON
-        try {
-          const parsedError = typeof errorData === 'string' ? JSON.parse(errorData) : errorData;
-
-          // Caso 1: Error específico con campos como `date_start` o `cottage_ids`
-          if (parsedError['date_start']) {
-            errorMessage = 'La fecha de inicio debe ser una fecha posterior al día de hoy.';
-          } else if (parsedError['cottage_ids']) {
-            errorMessage = 'Debes seleccionar al menos una cabaña.';
-          }
-
-          // Caso 2: Error general con `message`
-          if (parsedError.message) {
-            errorMessage = parsedError.message;
-          }
-        } catch (parseError) {
-          // Si no es un JSON válido, manejarlo como texto plano
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          }
-        }
-
-        // Mostrar mensaje de error con SweetAlert
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al guardar los datos',
-          text: errorMessage,
-        });
-      } else {
-        // Caso genérico si no hay datos en la respuesta
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al guardar los datos',
-          text: 'Ocurrió un error inesperado.',
-        });
-      }
+      console.error("Error al eliminar los datos:", error);
+      alert("Hubo un error al eliminadar los datos");
     }
-
-  }
+  };
 
   return (
     <Card>
@@ -280,10 +321,10 @@ const Reservas = () => {
                 {/* <td className="p-3">{cottage.price}</td> */}
                 <td className="p-2">
                   <div className="flex gap-2">
-                    <button className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700">
+                    <button className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700" onClick={() => handleEditClick(cottage)}>
                       <i className="fa-solid fa-pen "></i>
                     </button>
-                    <button className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700">
+                    <button className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700" onClick={() => handledeleteClick(cottage.id)}>
                       <i className="fa-solid fa-trash "></i>
                     </button>
                   </div>
@@ -297,11 +338,11 @@ const Reservas = () => {
       <Modal
         size="4xl"
         show={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={() => { setOpenModal(false); clearForm(); }}
         className=" flex flex-col"
       >
         <form onSubmit={handleSave} className="h-[900px] flex flex-col">
-          <Modal.Header>Holas</Modal.Header>
+          <Modal.Header>{selectedReservation ? "Editar Reservacion" : "Nueva Reserva"}</Modal.Header>
           <Modal.Body className="flex-2 overflow-y-auto h-full">
             <div className="h-screen space-y-6">
 
@@ -315,6 +356,7 @@ const Reservas = () => {
                     id="user-select"
                     onChange={(e) => setSelectedUser(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+                    defaultValue={selectedReservation?.user_id || ""}
                   >
                     <option value="">Seleccione un Usuario</option>
                     {help?.users?.map((user) => (
@@ -336,6 +378,7 @@ const Reservas = () => {
                     id="package-select"
                     onChange={handlePackageChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+                    defaultValue={selectedReservation?.package?.id || ""}
                   >
                     <option value="">Seleccione un Paquete</option>
                     {help?.packages?.map((packag) => (
@@ -442,7 +485,7 @@ const Reservas = () => {
                   <input
                     type="date"
                     name="date_start"
-                    value={dateStart}
+                    value={dateStart || ''}
                     onChange={handleDateStartChange}
                     placeholder="Check in"
                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${!selectedPackage ? "bg-gray-200 cursor-not-allowed" : ""
@@ -470,8 +513,8 @@ const Reservas = () => {
                 <button
                   type="button"
                   className={`mt-5 px-2 py-2 text-white rounded-md w-1/2 ${!selectedPackage
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
                     }`}
                   onClick={calculateTotal}
                   disabled={!selectedPackage} // Deshabilitar si no hay paquete seleccionado
@@ -516,7 +559,10 @@ const Reservas = () => {
             </div>
           </Modal.Body>
           <Modal.Footer className="bg-gray-100 flex justify-end space-x-4 py-4 border-t ">
-            <Button color="gray" onClick={() => setOpenModal(false)}>
+            <Button color="gray" onClick={() => {
+              setOpenModal(false);
+              clearForm();
+            }}>
               Cancelar
             </Button>
             <Button color="blue" type="submit">
