@@ -39,7 +39,7 @@ const CabinDetail = ({ max_person, }) => {
     },
   ];
 
-  const { user } = useContext(UserContext); 
+  const { user, setUser } = useContext(UserContext);
   const [showModal, setShowModal] = useState(false);
   const [showInitialPopup, setShowInitialPopup] = useState(true);
   const location = useLocation();
@@ -79,27 +79,34 @@ const CabinDetail = ({ max_person, }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleDateChange = (selectedDates) => {
-    if (selectedDates.length === 2) {
-      const [checkIn, checkOut] = selectedDates;
-  
-      // Validar que Check-Out no sea igual a Check-In
-      if (checkIn.toDateString() === checkOut.toDateString()) {
-        setErrorMessage("Debes seleccionar al menos una noche para la reserva.");
-        return;
-      }
-  
-      // Si la validación pasa, actualiza los estados
-      setDates(selectedDates);
-      setCheckInDate(checkIn);
-      setCheckOutDate(checkOut);
-      setErrorMessage(""); // Limpia cualquier mensaje de error
-    } else {
-      setDates([selectedDates[0], null]); // Selección inicial
-      setCheckInDate(selectedDates[0]);
-      setCheckOutDate(null);
+useEffect(() => {
+  if (!user) {
+    // Recupera desde localStorage si es necesario
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUser(storedUser);
     }
-  };
+  }
+}, []);
+
+const handleDateChange = (selectedDates) => {
+  if (selectedDates.length === 2) {
+    const [checkIn, checkOut] = selectedDates;
+
+    // No realices ninguna manipulación adicional a las fechas seleccionadas
+    setDates(selectedDates);
+    setCheckInDate(checkIn);
+    setCheckOutDate(checkOut);
+    setErrorMessage(""); // Limpia cualquier mensaje de error
+  } else {
+    const checkIn = selectedDates[0];
+
+    // Solo se establece la fecha de check-in si una sola fecha está seleccionada
+    setDates([checkIn, null]);
+    setCheckInDate(checkIn);
+    setCheckOutDate(null);
+  }
+};
 
   const calculateTotal = () => {
     if (!dates[0] || !dates[1]) return 0; // Si no hay fechas seleccionadas, retorna 0
@@ -206,43 +213,51 @@ const CabinDetail = ({ max_person, }) => {
   };
 
   const proceedToPayment = () => {
-    if (!user) {
-      navigate("/login", {
+    if (!user || !checkInDate || !checkOutDate) {
+      navigate("/pago", {
         state: {
-          from: "/cabin-detail",
           cabin,
           dates,
           guests,
+          total: calculateTotal(),
           clear: cabin.clear,
           garantia: cabin.garantia,
+          packageId: cabin.packageId,
           checkInDate,
           checkOutDate,
-          totalNights: numberOfNights, // Total de noches
+          totalNights: numberOfNights,
           priceMondayThursday: cabin.price_monday_to_thursday,
           priceFridaySunday: cabin.price_friday_to_sunday,
+          userId: user.id,
+          packageId: cabin.packageId, // Asegúrate de incluir packageId
         },
       });
       return;
     }
   
-    const total = calculateTotal();
-    navigate("/pago", {
-      state: {
-        cabin,
-        dates,
-        guests,
-        total,
-        clear: cabin.clear,
-        garantia: cabin.garantia,
-        checkInDate,
-        checkOutDate,
-        totalNights: numberOfNights, // Total de noches
-        priceMondayThursday: cabin.price_monday_to_thursday,
-        priceFridaySunday: cabin.price_friday_to_sunday,
-      },
-    });
-  };
+    // Datos necesarios para la página de pago
+    const reservationData = {
+      cabin,
+      dates,
+      guests,
+      total: calculateTotal(),
+      clear: cabin.clear,
+      garantia: cabin.garantia,
+      packageId: cabin.packageId,
+      checkInDate, // Enviar tal cual
+      checkOutDate,
+      totalNights: numberOfNights,
+      priceMondayThursday: cabin.price_monday_to_thursday,
+      priceFridaySunday: cabin.price_friday_to_sunday,
+      userId: user.id, // Incluye el ID del usuario
+    };
   
+    // Respaldo en localStorage
+    localStorage.setItem("reservationData", JSON.stringify(reservationData));
+  
+    // Navegación a la página de pago
+    navigate("/pago", { state: reservationData });
+  };
   
 
   const { translations, setCurrentView } = useContext(LanguageContext);
