@@ -1,5 +1,5 @@
 const NavData = [
-  { title: "Dashboard", rute: "dashboard", icon: "fa-solid fa-chart-pie" },
+  { title: "Dashboard", rute: "/dashboard", icon: "fa-solid fa-chart-pie" },
   { title: "Cabañas", rute: "cabanas", icon: "fa-solid fa-house-chimney" },
   { title: "Paquetes", rute: "paquetes", icon: "fa-solid fa-cubes" },
   { title: "Usuarios", rute: "usuarios", icon: "fa-solid fa-users" },

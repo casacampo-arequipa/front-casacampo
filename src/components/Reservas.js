@@ -68,7 +68,7 @@ const Reservas = () => {
     setSelectedUser(reservation.user_id);
     setIsActive(reservation.state);
   }
-  console.log(dateStart)
+
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const clearForm = () => {
     setSelectedReservation(null);
