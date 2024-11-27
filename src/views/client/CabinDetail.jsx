@@ -213,52 +213,60 @@ const handleDateChange = (selectedDates) => {
   };
 
   const proceedToPayment = () => {
-    if (!user || !checkInDate || !checkOutDate) {
-      navigate("/pago", {
-        state: {
-          cabin,
-          dates,
-          guests,
-          total: calculateTotal(),
-          clear: cabin.clear,
-          garantia: cabin.garantia,
-          packageId: cabin.packageId,
-          checkInDate,
-          checkOutDate,
-          totalNights: numberOfNights,
-          priceMondayThursday: cabin.price_monday_to_thursday,
-          priceFridaySunday: cabin.price_friday_to_sunday,
-          userId: user.id,
-          packageId: cabin.packageId, // Asegúrate de incluir packageId
-        },
-      });
-      return;
+    if (!user) {
+        // Redirige al usuario a la página de inicio de sesión si no está autenticado
+        navigate("/login", {
+            state: {
+                redirectTo: "/pago", // Redirigir de vuelta al pago después de iniciar sesión
+            },
+        });
+        return;
     }
-  
+
+    if (!checkInDate || !checkOutDate) {
+        navigate("/pago", {
+            state: {
+                cabin,
+                dates,
+                guests,
+                total: calculateTotal(),
+                clear: cabin.clear,
+                garantia: cabin.garantia,
+                packageId: cabin.packageId,
+                checkInDate,
+                checkOutDate,
+                totalNights: numberOfNights,
+                priceMondayThursday: cabin.price_monday_to_thursday,
+                priceFridaySunday: cabin.price_friday_to_sunday,
+                userId: user.id,
+            },
+        });
+        return;
+    }
+
     // Datos necesarios para la página de pago
     const reservationData = {
-      cabin,
-      dates,
-      guests,
-      total: calculateTotal(),
-      clear: cabin.clear,
-      garantia: cabin.garantia,
-      packageId: cabin.packageId,
-      checkInDate, // Enviar tal cual
-      checkOutDate,
-      totalNights: numberOfNights,
-      priceMondayThursday: cabin.price_monday_to_thursday,
-      priceFridaySunday: cabin.price_friday_to_sunday,
-      userId: user.id, // Incluye el ID del usuario
+        cabin,
+        dates,
+        guests,
+        total: calculateTotal(),
+        clear: cabin.clear,
+        garantia: cabin.garantia,
+        packageId: cabin.packageId,
+        checkInDate,
+        checkOutDate,
+        totalNights: numberOfNights,
+        priceMondayThursday: cabin.price_monday_to_thursday,
+        priceFridaySunday: cabin.price_friday_to_sunday,
+        userId: user.id,
     };
-  
+
     // Respaldo en localStorage
     localStorage.setItem("reservationData", JSON.stringify(reservationData));
-  
+
     // Navegación a la página de pago
     navigate("/pago", { state: reservationData });
-  };
-  
+};
 
   const { translations, setCurrentView } = useContext(LanguageContext);
 
