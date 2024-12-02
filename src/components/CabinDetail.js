@@ -2,6 +2,8 @@ import React, { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import { LanguageContext } from "./LanguageContext";
+import axios from "axios";
+import { API_URL } from "../env";
 
 const CabinDetail = () => {
   const comments = [
@@ -90,6 +92,17 @@ const CabinDetail = () => {
 
   const { translations, setCurrentView } = useContext(LanguageContext);
 
+  const handlePromotion = () => {
+    axios.get(`${API_URL}/apply_promotion`)
+      .then((resp) => {
+        console.log(resp)
+        setData(resp);
+      })
+      .catch((error) => {
+        console.log(error)
+        setError(error);
+      });
+  };
   useEffect(() => {
     setCurrentView("CabinDetail"); // Cambia "MyComponent" por el nombre de tu componente
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,7 +238,7 @@ const CabinDetail = () => {
                 placeholder="Código Promocional"
                 className="w-3/4 p-2 border rounded-lg"
               />
-              <button className="w-1/4 ml-2 p-2 bg-gray-200 rounded-lg">
+              <button onClick={handlePromotion} className="w-1/4 ml-2 p-2 bg-gray-200 rounded-lg">
                 {translations.aplicar}
               </button>
             </div>
@@ -257,6 +270,6 @@ const CabinDetail = () => {
       </div>
     </div>
   );
-};
+}
 
 export default CabinDetail;

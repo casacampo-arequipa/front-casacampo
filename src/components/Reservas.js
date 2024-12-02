@@ -81,7 +81,7 @@ const Reservas = () => {
     setIsActive(0);
   };
   const calculateTotal = () => {
-    if (!dateStart || !dateEnd || !selectedPackage) return;
+    if (!dateStart || !dateEnd || !selectedPackage) { setTotal(''); return };
 
     const startDate = new Date(dateStart + 'T00:00:00');
     const endDate = new Date(dateEnd + 'T00:00:00');
@@ -120,6 +120,7 @@ const Reservas = () => {
   const handleDateStartChange = (e) => {
     const start = e.target.value;
     setDateStart(start);
+    setTotal('');
 
     // Calcular automáticamente el `check-out` (un día después)
     const checkOutDate = new Date(start);
@@ -228,6 +229,11 @@ const Reservas = () => {
       }
     }
   }
+  const handleDateEndChange = (e) => {
+    const end = e.target.value;
+    setDateEnd(end);
+    setTotal('');  // Vaciar el total cuando se cambia la fecha de check-out
+  };
   const handledeleteClick = async (id) => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
@@ -283,7 +289,7 @@ const Reservas = () => {
         // onChange={(e) => setSearchTerm(e.target.value)}
         />
         <button onClick={() => handelneed()} className=" text-black p-2 rounded border border-black hover:bg-green-800 hover:text-white">
-          Agregar Cabaña
+          Nueva Reserva
         </button>
       </div>
 
@@ -525,9 +531,7 @@ const Reservas = () => {
                     type="date"
                     name="date_end"
                     value={dateEnd}
-                    onChange={(e) => {
-                      setDateEnd(e.target.value);
-                    }}
+                    onChange={handleDateEndChange}
                     placeholder="Check out"
                     className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${!selectedPackage ? "bg-gray-200 cursor-not-allowed" : ""
                       }`}
