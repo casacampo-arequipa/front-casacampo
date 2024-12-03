@@ -130,7 +130,7 @@ const Reservas = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!selectedUser || !selectedPackage || selectedCottage.length === 0 || !dateStart || !dateEnd || total === 0) {
+    if (!selectedUser || !selectedPackage || selectedCottage.length === 0 || !dateStart || !dateEnd || total === 0 || total === null || !total) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos incompletos',
