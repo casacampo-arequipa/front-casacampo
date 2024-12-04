@@ -34,7 +34,7 @@ const Login = () => {
         } else {
           // Redirige según el rol del usuario
           const role = getUserData().role;
-          navigate(role === "Admin" ? "/dashboard" : "/");
+          navigate(role === "Admin" ? "/admin" : "/");
         }
 
         alert("Usuario Logueado");

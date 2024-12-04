@@ -21,18 +21,19 @@ import Footer from "./views/client/partials/Footer";
 import Usuarios from "./views/admin/Usuarios";
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // Tema de PrimeReact (elige el que prefieras)
 import 'primereact/resources/primereact.min.css'; // Estilos de los componentes de PrimeReact
-import 'primeicons/primeicons.css'; 
+import 'primeicons/primeicons.css';
 import Package from "./components/Package";
 import Galeria from "./components/Galeria"; // Importa el componente Galeria
 import { HashRouter as Router } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext";
+import Dashboard from "./components/Dashboard";
 
 
 
 
 function Layout({ children }) {
   const location = useLocation();
-  const isDashboard = location.pathname.startsWith("/dashboard");
+  const isDashboard = location.pathname.startsWith("/admin");
 
   return (
     <>
@@ -59,60 +60,61 @@ function App() {
 
   return (
     <UserProvider>
-    <LanguageProvider>
-      <Router>
-        <div className="App">
-          {loading && <Loader />} {/* Muestra el cargador si está cargando */}
-          <Layout>
-            {/* Rutas de las páginas */}
-            <Routes>
-              {/* Rutas públicas */}
-              <Route
-                path="/"
-                element={
-                  <>
-                    <Inicio />
-                    <SocialMediaIcons />
-                  </>
-                }
-              />
+      <LanguageProvider>
+        <Router>
+          <div className="App">
+            {loading && <Loader />} {/* Muestra el cargador si está cargando */}
+            <Layout>
+              {/* Rutas de las páginas */}
+              <Routes>
+                {/* Rutas públicas */}
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <Inicio />
+                      <SocialMediaIcons />
+                    </>
+                  }
+                />
 
-              <Route
-                path="/cabin-detail"
-                element={
-                  <>
-                    <CabinDetail />
-                    <SocialMediaIcons />
-                  </>
-                }
-              />
-              <Route path="/pago" element={<PaymentPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/galeria"
-                element={
-                  <>
-                    <Galeria />
-                    <SocialMediaIcons />
-                  </>
-                }
-              />
+                <Route
+                  path="/cabin-detail"
+                  element={
+                    <>
+                      <CabinDetail />
+                      <SocialMediaIcons />
+                    </>
+                  }
+                />
+                <Route path="/pago" element={<PaymentPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/galeria"
+                  element={
+                    <>
+                      <Galeria />
+                      <SocialMediaIcons />
+                    </>
+                  }
+                />
 
-              {/* Dashboard con Sidebar persistente */}
-              <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route path="usuarios" element={<Usuarios />} />
-                <Route path="cabanas" element={<Cabanas />} />
-                <Route path="promociones" element={<Promociones />} />
-                <Route path="descuentos" element={<Descuentos />} />
-                <Route path="paquetes" element={<Package />} />
-                <Route path="reservas" element={<Reservas />} />
-              </Route>
-            </Routes>
-          </Layout>
-        </div>
-      </Router>
-    </LanguageProvider>
+                {/* Dashboard con Sidebar persistente */}
+                <Route path="/admin" element={<DashboardLayout />}>
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="usuarios" element={<Usuarios />} />
+                  <Route path="cabanas" element={<Cabanas />} />
+                  <Route path="promociones" element={<Promociones />} />
+                  <Route path="descuentos" element={<Descuentos />} />
+                  <Route path="paquetes" element={<Package />} />
+                  <Route path="reservas" element={<Reservas />} />
+                </Route>
+              </Routes>
+            </Layout>
+          </div>
+        </Router>
+      </LanguageProvider>
     </UserProvider>
   );
 }

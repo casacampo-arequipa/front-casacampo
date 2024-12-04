@@ -1,14 +1,14 @@
 export const getHeader = (pathname) => {
   switch (pathname) {
-    case "/dashboard/usuarios":
+    case "/dashboarda/usuarios":
       return "Usuarios";
-    case "/dashboard/cabanas":
+    case "/dashboarda/cabanas":
       return "Cabañas";
-    case "/dashboard/promociones":
+    case "/dashboarda/promociones":
       return "Promociones";
-    case "/dashboard/descuentos":
+    case "/dashboarda/descuentos":
       return "Descuentos";
-    case "/dashboard/reservas":
+    case "/dashboarda/reservas":
       return "Reservas";
     default:
       return "Dashboard";
@@ -17,15 +17,15 @@ export const getHeader = (pathname) => {
 
 export const getSection = (pathname) => {
   switch (pathname) {
-    case "/dashboard/usuarios":
+    case "/dashboarda/usuarios":
       return "Gestión de usuarios";
-    case "/dashboard/cabanas":
+    case "/dashboarda/cabanas":
       return "Gestión de cabañas";
-    case "/dashboard/promociones":
+    case "/dashboarda/promociones":
       return "Gestión de promociones";
-    case "/dashboard/descuentos":
+    case "/dashboarda/descuentos":
       return "Gestión de descuentos";
-    case "/dashboard/reservas":
+    case "/dashboarda/reservas":
       return "Gestión de reservas";
     default:
       return "Bienvenido al panel";
