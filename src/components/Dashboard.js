@@ -1,137 +1,111 @@
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { Calendar } from 'primereact/calendar';
 import 'react-calendar/dist/Calendar.css';
-import { useEffect, useState } from 'react';
-import Chart from "react-apexcharts";
-import DoughnutChartDemo from './atoms/dashboard/DoughnutChartDemo';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+import { useState } from 'react';
 import { Tag } from 'primereact/tag';
+import useFetch from '../useFetchAdmin';
+import Barras from './atoms/dashboard/DougChartBarras';
+import Torta from './atoms/dashboard/DougChartTorta';
+import FiveReservations from './atoms/dashboard/DougChartListR';
+import MoreUserReserva from './atoms/dashboard/DougChartUserHori';
+import CalendarReservet from './atoms/dashboard/DougChatCalendar';
 // Registrar los componentes de Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
-    const [latestReservations, setLatestReservations] = useState([]);
-    const [calendarDate, setCalendarDate] = useState(new Date());
+    const { data, loading, error } = useFetch("dashboard");
+    const [selectedYear, setSelectedYear] = useState(null);
+    const chartData = () => {
+        if (!data || !data.estadistica) {
+            console.error("Los datos no están disponibles");
+            return {
+                labels: [],
+                datasets: []
+            };
+        }
 
-    useEffect(() => {
-        // Aquí podrías hacer una llamada a la API para obtener los datos dinámicos.
-        setLatestReservations([
-            { id: 1, user: 'Usuario 1', date: '2024-12-01', cabin: 'Cabaña 3', state: "Pagado" },
-            { id: 2, user: 'Usuario 2', date: '2024-12-02', cabin: 'Cabaña 5', state: "Pagado" },
-            { id: 3, user: 'Usuario 3', date: '2024-12-03', cabin: 'Cabaña 1', state: "No Pagado" },
-            { id: 4, user: 'Usuario 4', date: '2024-12-04', cabin: 'Cabaña 2', state: "Pagado" },
-            { id: 5, user: 'Usuario 5', date: '2024-12-05', cabin: 'Cabaña 4', state: "No Pagado" }
-        ]);
-    }, []);
+        // Inicialización de los datos
+        const usuariosMonthlyData = Array(12).fill(0);  // Inicializamos con 0
+        const reservasMonthlyData = Array(12).fill(0); // Inicializamos con 0
+        const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const years = new Set();  // Usamos un Set para evitar duplicados
+        let earliestMonth = 12;  // Inicializamos con diciembre (12), ya que queremos encontrar el mes más temprano
 
-    const chartData = {
-        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-        datasets: [
-            {
-                label: 'Usuarios Registrados',
-                data: [12, 19, 3, 5, 2, 3, 7, 12, 15, 20, 18, 25],
-                borderColor: '#A91729',
-                backgroundColor: 'rgba(169, 23, 41, 0.2)',
-                fill: true,
-                tension: 0.4,
-            },
-            {
-                label: 'Reservas',
-                data: [8, 15, 12, 9, 11, 13, 16, 19, 21, 22, 24, 30],
-                borderColor: '#F3F4F6',
-                backgroundColor: 'rgba(243, 244, 246, 0.2)',
-                fill: true,
-                tension: 0.4,
+        // Procesamos los usuarios por mes
+        for (const [mes, cantidad] of Object.entries(data.estadistica.tendusuarios)) {
+            const [year, month] = mes.split('-');
+            years.add(year);  // Añadimos el año al set
+            const monthIndex = parseInt(month, 10) - 1;
+            usuariosMonthlyData[monthIndex] = cantidad;
+            earliestMonth = Math.min(earliestMonth, monthIndex);  // Encontramos el mes más temprano
+        }
+
+        // Procesamos las reservas por mes
+        data.estadistica.tendreservas.forEach((reserva) => {
+            const [year, month] = reserva.mes.split('-');
+            years.add(year);  // Añadimos el año al set
+            const monthIndex = parseInt(month, 10) - 1;
+            reservasMonthlyData[monthIndex] = reserva.total_reservas;
+            earliestMonth = Math.min(earliestMonth, monthIndex);  // Encontramos el mes más temprano
+        });
+
+        const year = selectedYear || new Date().getFullYear().toString();
+        // Filtramos las etiquetas para empezar desde el mes más temprano
+
+        // Filtramos los datos para solo incluir el año seleccionado
+        const filteredUsuariosData = Array(12).fill(0);
+        const filteredReservasData = Array(12).fill(0);
+
+        // Procesamos los usuarios solo para el año seleccionado
+        for (const [mes, cantidad] of Object.entries(data.estadistica.tendusuarios)) {
+            const [dataYear, month] = mes.split('-');
+            if (dataYear === year) {
+                const monthIndex = parseInt(month, 10) - 1;
+                filteredUsuariosData[monthIndex] = cantidad;
             }
-        ]
+        }
+
+        // Procesamos las reservas solo para el año seleccionado
+        data.estadistica.tendreservas.forEach((reserva) => {
+            const [dataYear, month] = reserva.mes.split('-');
+            if (dataYear === year) {
+                const monthIndex = parseInt(month, 10) - 1;
+                filteredReservasData[monthIndex] = reserva.total_reservas;
+            }
+        });
+
+        // Filtramos las etiquetas para mostrar solo los meses para el año seleccionado
+        const filteredLabels = labels.slice(earliestMonth);
+
+        // Ahora que solo tenemos los datos para el año seleccionado, creamos las etiquetas correctamente
+        const labelsWithYear = filteredLabels.map((month) => `${month} ${year}`);
+
+        // Actualizamos los datos del gráfico
+        const chart = {
+            labels: labelsWithYear,
+            datasets: [
+                {
+                    label: `Usuarios Registrados ${year}`,
+                    data: filteredUsuariosData.slice(earliestMonth),  // Filtramos los datos a partir del mes más temprano
+                    borderColor: '#A91729',
+                    backgroundColor: 'rgba(169, 23, 41, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                },
+                {
+                    label: `Reservas ${year}`,
+                    data: filteredReservasData.slice(earliestMonth),  // Filtramos los datos a partir del mes más temprano
+                    borderColor: '#1F2937',
+                    backgroundColor: 'rgba(31, 41, 55, 0.2)',
+                    fill: true,
+                    tension: 0.9,
+                }
+            ]
+        };
+
+        return chart;
     };
-    const chartConfig = {
-        series: [
-            {
-                name: "Sales",
-                data: [50, 40, 300, 320, 500, 350, 200, 230, 200],
-            },
-        ],
-        chart: {
-            type: "bar",
-            height: 240,
-            toolbar: {
-                show: false,
-            },
-        },
-        title: {
-            show: false,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ["#A91729"],
-        plotOptions: {
-            bar: {
-                columnWidth: "40%",
-                borderRadius: 2,
-            },
-        },
-        xaxis: {
-            axisTicks: {
-                show: false,
-            },
-            axisBorder: {
-                show: false,
-            },
-            labels: {
-                style: {
-                    colors: "#616161",
-                    fontSize: "12px",
-                    fontFamily: "inherit",
-                    fontWeight: 400,
-                },
-            },
-            categories: [
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dec",
-            ],
-        },
-        yaxis: {
-            labels: {
-                style: {
-                    colors: "#616161",
-                    fontSize: "12px",
-                    fontFamily: "inherit",
-                    fontWeight: 400,
-                },
-            },
-        },
-        grid: {
-            show: true,
-            borderColor: "#dddddd",
-            strokeDashArray: 5,
-            xaxis: {
-                lines: {
-                    show: true,
-                },
-            },
-            padding: {
-                top: 5,
-                right: 90,
-            },
-        },
-        fill: {
-            opacity: 0.8,
-        },
-        tooltip: {
-            theme: "dark",
-        },
-    };
+    const chart = chartData();
     const getSeverity = (product) => {
         switch (product.state) {
             case 'Pagado':
@@ -148,9 +122,14 @@ const Dashboard = () => {
         }
     };
     const statusBodyTemplate = (product) => {
-        console.log(product)
         return <Tag value={product.state} severity={getSeverity(product)}></Tag>;
     };
+    const handleYearChange = (event) => {
+        setSelectedYear(event.target.value);
+    };
+
+
+
     return (
         <>
             <div className="p-6 bg-white rounded-lg shadow-lg space-y-8">
@@ -171,7 +150,7 @@ const Dashboard = () => {
                         <div className='flex justify-between items-center'>
                             <div className='mb-2'>
                                 <h2 className="text-lg mb-2">Usuarios</h2>
-                                <p className="text-2xl font-bold">145</p>
+                                <p className="text-2xl font-bold">{data?.cards?.usuarios}</p>
                             </div>
                             <i className="fas fa-users text-white text-5xl"></i>
                         </div>
@@ -190,7 +169,7 @@ const Dashboard = () => {
                         <div className='flex justify-between items-center'>
                             <div className='mb-2'>
                                 <h2 className="text-lg mb-2">Reservas</h2>
-                                <p className="text-2xl font-bold">98</p>
+                                <p className="text-2xl font-bold">{data?.cards?.reservas}</p>
                             </div>
                             <i className="fas fa-calendar-alt text-5xl"></i>
                         </div>
@@ -226,7 +205,7 @@ const Dashboard = () => {
                         <div className='flex justify-between items-center'>
                             <div className='mb-2 text-white'>
                                 <h2 className="text-lg mb-2">Promociones</h2>
-                                <p className="text-2xl font-bold">5</p>
+                                <p className="text-2xl font-bold">{data?.cards?.promociones}</p>
                             </div>
                             <i className="fas fa-tags text-white text-5xl"></i>
                         </div>
@@ -250,52 +229,53 @@ const Dashboard = () => {
                         </div>
                     </div> */}
                 </div>
+
                 <div className="grid xl:grid-cols-3 xl:gap-6 gap-x-10 gap-y-4">
                     <div className="bg-white p-6 rounded-xl shadow-md border xl:col-span-2 ">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Tendencia de Usuarios y Reservas</h2>
-                        <Line data={chartData} height={120} />
+                        <div className='flex justify-between'>
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4">Tendencia de Usuarios y Reservas</h2>
+                            <select
+                                value={selectedYear || new Date().getFullYear().toString()}  // Si no hay selectedYear, usa el año actual
+                                onChange={handleYearChange}
+                                className="mb-4 p-2 border rounded-md"
+                            >
+                                {Array.from(new Set([
+                                    ...(data?.estadistica?.tendusuarios ? Object.keys(data.estadistica.tendusuarios).map(key => key.split('-')[0]) : []),
+                                    ...(data?.estadistica?.tendreservas ? data.estadistica.tendreservas.map(reserva => reserva.mes.split('-')[0]) : [])
+                                ])).map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <Line data={chart} height={120} />
                     </div>
                     <div className="rounded-xl bg-white text-[#A91729] shadow-md border xl:col-span-1">
                         <div className="pt-6 px-3 pb-0">
-                            <h2 className='font-semibold text-xl ml-2 mb-5'>Ganacias por mes</h2>
-                            <Chart options={chartConfig} series={chartConfig.series} type="bar" height={400} width={570} />
+                            <Barras />
                         </div>
                     </div>
                 </div>
 
 
                 <div className="grid xl:grid-cols-3 xl:gap-6 gap-x-10 gap-y-4">
-                    <DoughnutChartDemo />
+                    <Torta />
                     <div className="border bg-white p-6 rounded-lg shadow-md xl:col-span-2">
                         <h2 className="text-xl font-semibold text-gray-800 mb-4">Últimas 5 Reservas</h2>
-                        <DataTable value={latestReservations} tableStyle={{ minWidth: '10rem' }}>
-                            <Column field="user" header="Usuario" />
-                            <Column field="date" header="Fecha" />
-                            <Column field="cabin" header="Cabaña" />
-                            <Column header="Estado" body={statusBodyTemplate}></Column>
-                        </DataTable>
+                        <FiveReservations />
                     </div>
 
                 </div>
                 <div className="grid xl:grid-cols-3 xl:gap-6 gap-x-10 gap-y-4">
                     <div className="border bg-white p-6 rounded-lg shadow-md xl:col-span-2">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Usuarios con más Reservas</h2>
-                        <DataTable value={latestReservations} tableStyle={{ minWidth: '10rem' }}>
-                            <Column field="user" header="Usuario" />
-                            <Column field="date" header="Fecha" />
-                            <Column field="cabin" header="Cabaña" />
-                            <Column header="Estado" body={statusBodyTemplate}></Column>
-                        </DataTable>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">5 Primeros Usuarios con más Reservas</h2>
+                        <MoreUserReserva />
                     </div>
                     <div className="bg-white p-6 rounded-xl shadow-md border items-center grid">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4 ">Calendario de Reservas</h2>
-                        <Calendar
-                            onChange={setCalendarDate}
-                            value={calendarDate}
-                            tileClassName="bg-gray-200"
-                            style={{ height: '400px' }}
-                            inline showWeek
-                        />
+                        <CalendarReservet />
                     </div>
                 </div>
             </div>
