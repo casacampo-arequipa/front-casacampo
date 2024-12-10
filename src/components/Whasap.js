@@ -21,7 +21,7 @@ const Whasap = () => {
   return (
     <div className="container-boton" ref={botonRef}>
       <a
-        href="https://api.whatsapp.com/send?phone=+51987563711&text=Hola, Necesito más información!"
+        href="https://api.whatsapp.com/send?phone=+51950280738&text=Hola, Necesito más información!"
         target="_blank"
         rel="noreferrer"
       >

@@ -18,7 +18,7 @@ export default function Header({
             <i className="fa-solid fa-location-dot mr-1"></i>Arequipa - Yanahuara
           </li>
           <li className="flex items-center">
-            <i className="fa-solid fa-phone mr-1"></i>+51 987563711
+            <i className="fa-solid fa-phone mr-1"></i>+51 950280738
 
           </li>
           <li className="flex items-center">
