@@ -125,7 +125,7 @@ export default function Footer() {
                           href="tel:+516258000"
                           className="text-white hover:underline"
                         >
-                          (+51) 987 563 711
+                          (+51) 950 280 738
                         </a>
                       </p>
                     </div>

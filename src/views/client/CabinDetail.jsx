@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import axios from "axios"
 import { LanguageContext } from "../../components/LanguageContext";
-import { UserContext } from "../../contexts/UserContext";
 import ColoredSection from "../../components/Section/ColoredSection";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { FaUser } from "react-icons/fa";
@@ -39,13 +38,12 @@ const CabinDetail = ({ max_person, }) => {
     },
   ];
 
-  const { user, setUser } = useContext(UserContext);
   const [showModal, setShowModal] = useState(false);
   const [showInitialPopup, setShowInitialPopup] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const cabin = location.state?.cabin || {};
-
+  console.log(cabin);
   const [dates, setDates] = useState([new Date(), new Date()]);
   const [checkInDate, setCheckInDate] = useState(null);
   const [checkOutDate, setCheckOutDate] = useState(null);
@@ -53,6 +51,7 @@ const CabinDetail = ({ max_person, }) => {
   const [promoCode, setPromoCode] = useState("");
   const [isGuestDropdownOpen, setIsGuestDropdownOpen] = useState(false);
   const [data, setData] = useState()
+  const [discount, setDiscount] = useState(0);
   const [error, setError] = useState()
 
   useEffect(() => {
@@ -74,53 +73,46 @@ const CabinDetail = ({ max_person, }) => {
         })
     }
   }, [])
-
+  console.log(data)
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
-
-  useEffect(() => {
-    if (!user) {
-      // Recupera desde localStorage si es necesario
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (storedUser) {
-        setUser(storedUser);
-      }
-    }
   }, []);
 
   const handleDateChange = (selectedDates) => {
     if (selectedDates.length === 2) {
       const [checkIn, checkOut] = selectedDates;
-
-      // No realices ninguna manipulación adicional a las fechas seleccionadas
+  
+      // Validar que Check-Out no sea igual a Check-In
+      if (checkIn.toDateString() === checkOut.toDateString()) {
+        setErrorMessage("Debes seleccionar al menos una noche para la reserva.");
+        return;
+      }
+  
+      // Si la validación pasa, actualiza los estados
       setDates(selectedDates);
       setCheckInDate(checkIn);
       setCheckOutDate(checkOut);
       setErrorMessage(""); // Limpia cualquier mensaje de error
     } else {
-      const checkIn = selectedDates[0];
-
-      // Solo se establece la fecha de check-in si una sola fecha está seleccionada
-      setDates([checkIn, null]);
-      setCheckInDate(checkIn);
+      setDates([selectedDates[0], null]); // Selección inicial
+      setCheckInDate(selectedDates[0]);
       setCheckOutDate(null);
     }
   };
-
+  
   const calculateTotal = () => {
     if (!dates[0] || !dates[1]) return 0; // Si no hay fechas seleccionadas, retorna 0
-
+  
     // Calcula el número de noches excluyendo el día de salida
     const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
-
+  
     let total = 0;
-
+  
     // Calcular el total de las noches
     for (let i = 0; i < numberOfNights; i++) {
       const currentDay = new Date(dates[0]);
       currentDay.setDate(currentDay.getDate() + i);
-
+  
       // Verifica si el día actual es entre lunes y jueves o entre viernes y domingo
       if (currentDay.getDay() >= 1 && currentDay.getDay() <= 4) {
         // Lunes a Jueves
@@ -130,19 +122,21 @@ const CabinDetail = ({ max_person, }) => {
         total += cabin.price_friday_to_sunday ? Number(cabin.price_friday_to_sunday) : 0;
       }
     }
-
-    // Agregar cargos adicionales si existen
-    const clearCharge = cabin.clear ? Number(cabin.clear) : 0; // Costo adicional por limpieza
+  
+    // Agregar solo el cargo por garantía (sin incluir el de limpieza)
     const garantiaCharge = cabin.garantia ? Number(cabin.garantia) : 0; // Costo adicional por garantía
-
-    // Sumar los cargos adicionales al total
-    total += clearCharge + garantiaCharge;
-
+  
+    // Sumar el cargo de garantía al total
+    total += garantiaCharge;
+  
+    // Calcular el descuento y restarlo del total
+    const discountAmount = (total * discount) / 100;
+    total -= discountAmount;
+  
     return total; // Retorna el total calculado
   };
-
-  const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
-
+  
+const numberOfNights = Math.max(0, Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24)) - 1);
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
@@ -175,12 +169,12 @@ const CabinDetail = ({ max_person, }) => {
   const tileDisabled = ({ date, view }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Elimina la hora para comparar solo la fecha
-
+  
     // Deshabilita fechas antes de hoy
     if (date < today) {
       return true;
     }
-
+  
     // Deshabilita fechas ya reservadas
     if (view === "month" && data?.reservations) {
       const isReserved = data.reservations.some((reservation) => {
@@ -190,14 +184,15 @@ const CabinDetail = ({ max_person, }) => {
       });
       if (isReserved) return true;
     }
-
+  
     // Deshabilita la misma fecha seleccionada como Check-In
     if (checkInDate && date.getTime() === checkInDate.getTime()) {
       return true;
     }
-
+  
     return false;
   };
+  
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleGuestChange = (type, operation) => {
@@ -213,90 +208,64 @@ const CabinDetail = ({ max_person, }) => {
   };
 
   const proceedToPayment = () => {
-    if (!user) {
-      // Redirige al usuario a la página de inicio de sesión si no está autenticado
-      navigate("/login", {
-        state: {
-          redirectTo: "/pago", // Redirigir de vuelta al pago después de iniciar sesión
-        },
-      });
-      return;
-    }
-
-    if (!checkInDate || !checkOutDate) {
-      navigate("/pago", {
-        state: {
-          cabin,
-          dates,
-          guests,
-          total: calculateTotal(),
-          clear: cabin.clear,
-          garantia: cabin.garantia,
-          packageId: cabin.packageId,
-          checkInDate,
-          checkOutDate,
-          totalNights: numberOfNights,
-          priceMondayThursday: cabin.price_monday_to_thursday,
-          priceFridaySunday: cabin.price_friday_to_sunday,
-          userId: user.id,
-        },
-      });
-      return;
-    }
-
-    // Datos necesarios para la página de pago
-    const reservationData = {
-      cabin,
-      dates,
-      guests,
-      total: calculateTotal(),
-      clear: cabin.clear,
-      garantia: cabin.garantia,
-      packageId: cabin.packageId,
-      checkInDate,
-      checkOutDate,
-      totalNights: numberOfNights,
-      priceMondayThursday: cabin.price_monday_to_thursday,
-      priceFridaySunday: cabin.price_friday_to_sunday,
-      userId: user.id,
-    };
-
-    // Respaldo en localStorage
-    localStorage.setItem("reservationData", JSON.stringify(reservationData));
-
-    // Navegación a la página de pago
-    navigate("/pago", { state: reservationData });
+    const total = calculateTotal();
+    navigate("/pago", { state: { dates, guests, total } });
   };
 
   const { translations, setCurrentView } = useContext(LanguageContext);
 
   useEffect(() => {
-    setCurrentView("CabinDetail");
+    setCurrentView("CabinDetail"); // Cambia "MyComponent" por el nombre de tu componente
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    // Si los datos no están definidos, intenta recuperarlos del estado de navegación
-    if (!cabin && location.state) {
-      const { cabin: stateCabin, dates: stateDates, guests: stateGuests } = location.state;
-      setDates(stateDates || [new Date(), new Date()]);
-      setGuests(stateGuests || { adults: 1, children: 0, babies: 0 });
-    }
-  }, [location.state]);
-
+  const handleReservation = () => {
+    setShowModal(true); // Muestra el modal
+  };
 
   const handleCloseModal = () => {
     setShowModal(false); // Cierra el modal
   };
 
-
+  const validatePromoCode = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/apply_promotion`, {
+        params: {
+          name_promotion: promoCode, // Enviar el código de promoción como 'name_promotion'
+        },
+      });
+  
+      // Imprimir la respuesta completa del backend
+      console.log("Respuesta del backend:", response);
+  
+      if (response.status === 200) {
+        const promotion = response.data.PROMO;
+        setDiscount(promotion.percentage); // Aplicar el descuento basado en el porcentaje de la promoción
+        setErrorMessage(""); // Limpiar el mensaje de error si es válido
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log("Error response:", error.response);  // Log detallado de la respuesta de error
+        if (error.response.status === 403) {
+          setErrorMessage("Código promocional no válido o ha expirado.");
+        } else {
+          setErrorMessage(`Ocurrió un error al aplicar el código: ${error.response.data.message || error.message}`);
+        }
+      } else {
+        console.log("Error:", error);  // Log para cualquier otro error (sin respuesta)
+        setErrorMessage("Ocurrió un error al aplicar el código.");
+      }
+      setDiscount(0); // Limpiar el descuento si el código es inválido
+    }
+  };
 
   return (
     <ColoredSection>
       <div className="py-12 px-4">
-        <h1 className="text-3xl font-bold ">{cabin.name}</h1>
+      <h1 className="text-3xl font-bold ">{cabin.name}</h1>
 
-        {/* Popup inicial */}
-        {showInitialPopup && (
+       {/* Popup inicial */}
+       {showInitialPopup && (
           <div
             className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
             onClick={() => setShowInitialPopup(false)} // Cierra el popup al hacer clic fuera de él
@@ -332,9 +301,9 @@ const CabinDetail = ({ max_person, }) => {
               <p className="text-gray-800 my-12">{cabin.description ? cabin.description : "No hay descripcion"}</p>
 
               <p className="text-blue-600 underline cursor-pointer hover:text-blue-800">
-                <a
-                  href="https://youtu.be/t-dIbIOie8U?si=_bpAI3P_59Z9uhCQ"
-                  target="_blank"
+                <a 
+                  href="https://youtube.com/shorts/5NcWcb_3VSI?si=wMAITrW0FFUWkhHX" 
+                  target="_blank" 
                   rel="noopener noreferrer"
                 >
                   Video Recorrido del interior
@@ -350,10 +319,7 @@ const CabinDetail = ({ max_person, }) => {
                 <p>
                   <strong>Check Out:</strong> <span className="font-bold">9 am (hora exacta)</span>
                 </p>
-                <p className="mt-2">
-                  <strong>Tarifa de limpieza:</strong> S/.{" "}
-                  {cabin.clear ? Number(cabin.clear).toFixed(2) : "No especificado"}
-                </p>
+                
                 <p>
                   <strong>Garantía:</strong> S/.{" "}
                   {cabin.garantia ? Number(cabin.garantia).toFixed(2) : "No especificada"} (La garantía se hará devolución, pero se podría deducir en caso de destrozos en el interior y exterior, pérdidas, exceso de suciedad, o check out a destiempo)
@@ -375,9 +341,10 @@ const CabinDetail = ({ max_person, }) => {
                 tileClassName={tileClassName}
                 tileDisabled={tileDisabled}
               />
-              <div className="mt-2">
-                {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
-              </div>
+
+<div className="mt-2">
+  {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+</div>
 
               {/* Mostrar fechas de ingreso y salida */}
               <div className="mt-4 flex justify-between">
@@ -409,30 +376,24 @@ const CabinDetail = ({ max_person, }) => {
 
               <hr className="my-2" />
 
-
+              
 
               <div className="mt-4">
-                <div className="flex justify-between">
-                  <span>Tarifa de limpieza:</span>
-                  <span>{cabin.clear ? cabin.clear : "No especificado"}</span>
-                </div>
+                
                 <div className="flex justify-between">
                   <span>Garantía:</span>
                   <span>{cabin.garantia ? cabin.garantia : "No especificada"}</span>
                 </div>
               </div>
 
-
-
+              
+              
               <div className="flex justify-between bg-black text-white p-2 rounded-lg">
                 <span>Total a Pagar:</span>
                 <span>S/. {calculateTotal().toFixed(2)}</span>
               </div>
 
-              <div className="flex justify-between">
-                <span>IGV (18%):</span>
-                <span>S/. {(calculateTotal() - (calculateTotal() / 1.18)).toFixed(2)}</span>
-              </div>
+              
 
               <hr className="my-2" />
 
@@ -443,100 +404,114 @@ const CabinDetail = ({ max_person, }) => {
                 >
                   {`Huéspedes: ${guests.adults} Adulto(s), ${guests.children} Niño(s), ${guests.babies} Bebé(s)`}
                 </button>
-                {isGuestDropdownOpen && (
-                  <div className="absolute z-10 bg-white shadow-lg p-4 mt-2 rounded-lg w-full">
-                    <div className="space-y-2">
-                      {/* Adultos */}
-                      <div className="flex justify-between items-center">
-                        <p>Adultos (Edad 13+):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() => handleGuestChange("adults", "decrement")}
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.adults}</p>
-                          <button
-                            onClick={() => {
-                              // Verifica si el número total de adultos + niños no supera el max_person
-                              if (guests.adults + guests.children < cabin.max_person) {
-                                handleGuestChange("adults", "increment");
-                              }
-                            }}
-                            className="p-2 border rounded-full"
-                            disabled={guests.adults + guests.children >= max_person} // Deshabilita si se supera el límite
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
+                {isGuestDropdownOpen &&  (
+  <div className="absolute z-10 bg-white shadow-lg p-4 mt-2 rounded-lg w-full">
+    <div className="space-y-2">
+      {/* Adultos */}
+      <div className="flex justify-between items-center">
+        <p>Adultos (Edad 13+):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("adults", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.adults}</p>
+          <button
+            onClick={() => {
+              // Verifica si el número total de adultos + niños no supera el max_person
+              if (guests.adults + guests.children < cabin.max_person) {
+                handleGuestChange("adults", "increment");
+              }
+            }}
+            className="p-2 border rounded-full"
+            disabled={guests.adults + guests.children >= max_person} // Deshabilita si se supera el límite
+          >
+            +
+          </button>
+        </div>
+      </div>
 
-                      {/* Niños */}
-                      <div className="flex justify-between items-center">
-                        <p>Niños (Edad 2-12):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() => handleGuestChange("children", "decrement")}
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.children}</p>
-                          <button
-                            onClick={() => {
-                              // Verifica si el número total de adultos + niños no supera el max_person
-                              if (guests.adults + guests.children < cabin.max_person) {
-                                handleGuestChange("children", "increment");
-                              }
-                            }}
-                            className="p-2 border rounded-full"
-                            disabled={guests.adults + guests.children >= cabin.max_person} // Deshabilita si se supera el límite
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
+      {/* Niños */}
+      <div className="flex justify-between items-center">
+        <p>Niños (Edad 2-12):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("children", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.children}</p>
+          <button
+            onClick={() => {
+              // Verifica si el número total de adultos + niños no supera el max_person
+              if (guests.adults + guests.children < cabin.max_person) {
+                handleGuestChange("children", "increment");
+              }
+            }}
+            className="p-2 border rounded-full"
+            disabled={guests.adults + guests.children >= cabin.max_person} // Deshabilita si se supera el límite
+          >
+            +
+          </button>
+        </div>
+      </div>
 
-                      {/* Bebés */}
-                      <div className="flex justify-between items-center">
-                        <p>Bebés (Menos de 2 años):</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() => handleGuestChange("babies", "decrement")}
-                            className="p-2 border rounded-full"
-                          >
-                            -
-                          </button>
-                          <p className="mx-2">{guests.babies}</p>
-                          <button
-                            onClick={() => handleGuestChange("babies", "increment")}
-                            className="p-2 border rounded-full"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+      {/* Bebés */}
+      <div className="flex justify-between items-center">
+        <p>Bebés (Menos de 2 años):</p>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleGuestChange("babies", "decrement")}
+            className="p-2 border rounded-full"
+          >
+            -
+          </button>
+          <p className="mx-2">{guests.babies}</p>
+          <button
+            onClick={() => handleGuestChange("babies", "increment")}
+            className="p-2 border rounded-full"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
               </div>
-              <div className="mt-2 flex items-center">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Código Promocional"
-                  className="w-3/4 p-2 border rounded-lg"
-                />
-                <button className="w-1/4 ml-2 p-2 bg-gray-200 rounded-lg">
-                  {translations.aplicar}
-                </button>
+              <div className="mt-6">
+                <label className="block text-gray-700 font-medium">
+                  Código promocional:
+                </label>
+                <div className="flex items-center gap-4 mt-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-4 py-2 w-3/4"
+                    placeholder="Ingrese su código"
+                  />
+                  <button
+                    onClick={validatePromoCode}
+                    className="bg-red-800 text-white px-4 py-2 rounded-lg w-1/5"
+                  >
+                    Aplicar
+                  </button>
+                </div>
+                {errorMessage && (
+                  <p className="text-red-500 mt-2">{errorMessage}</p>
+                )}
+                {discount > 0 && (
+                  <p className="text-green-500 mt-2">¡Descuento aplicado: {discount}%!</p>
+                )}
               </div>
 
               <button
+                onClick={handleReservation}
                 className="mt-4 text-black border px-4 py-2 rounded-lg hover:bg-red-700 hover:text-white"
-                onClick={proceedToPayment}
               >
                 {translations.reservar}
               </button>
@@ -545,55 +520,101 @@ const CabinDetail = ({ max_person, }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+ 
 
-
-          {/* Sección de comentarios */}
-          <div className="md:col-span-2 rounded-xl overflow-hidden border border-red-800 order-2 md:order-none">
-            <div className="bg-red-800 px-4 py-2">
-              <h2 className="text-base font-semibold text-white">
-                {translations.comentarios}
-              </h2>
-            </div>
-            <div className="px-4 py-2">
-              <div className="space-y-4">
-                {comments.map((comment, index) => (
-                  <div key={index} className="">
-                    <div className="flex gap-2 mb-2 items-center">
-                      <FaUser className="text-3xl cursor-pointer" />
-                      <div className="flex flex-col">
-                        <span className="text-gray-800 font-semibold">{comment.author}</span>
-                        <span className="text-gray-600 text-sm">{comment.date}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-gray-800">{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
+  {/* Sección de comentarios */}
+  <div className="md:col-span-2 rounded-xl overflow-hidden border border-red-800 order-2 md:order-none">
+    <div className="bg-red-800 px-4 py-2">
+      <h2 className="text-base font-semibold text-white">
+        {translations.comentarios}
+      </h2>
+    </div>
+    <div className="px-4 py-2">
+      <div className="space-y-4">
+        {comments.map((comment, index) => (
+          <div key={index} className="">
+            <div className="flex gap-2 mb-2 items-center">
+              <FaUser className="text-3xl cursor-pointer" />
+              <div className="flex flex-col">
+                <span className="text-gray-800 font-semibold">{comment.author}</span>
+                <span className="text-gray-600 text-sm">{comment.date}</span>
               </div>
             </div>
-          </div>
-          {/* Mover el div de "Deja tu comentario" arriba de los comentarios en pantallas móviles */}
-          <div className="md:col-span-1 rounded-xl overflow-hidden border border-red-800 h-max order-1 md:order-none">
-            <div className="bg-red-800 px-4 py-2">
-              <h2 className="text-base font-semibold text-white">Deja tu comentario</h2>
-            </div>
-            <div className="px-4 py-2">
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
-                  <input
-                    type="text"
-                    placeholder="Aquí tu comentario"
-                    className="p-2 border rounded-lg text-sm w-full sm:w-auto"
-                  />
-                  <button className="px-4 py-2 bg-gray-200 hover:bg-green-700 hover:text-white rounded-lg duration-500">
-                    <i className="fa-solid fa-paper-plane"></i>
-                  </button>
-                </div>
-              </div>
+            <div>
+              <p className="text-gray-800">{comment.text}</p>
             </div>
           </div>
+        ))}
+      </div>
+    </div>
+  </div>
+   {/* Mover el div de "Deja tu comentario" arriba de los comentarios en pantallas móviles */}
+   <div className="md:col-span-1 rounded-xl overflow-hidden border border-red-800 h-max order-1 md:order-none">
+    <div className="bg-red-800 px-4 py-2">
+      <h2 className="text-base font-semibold text-white">Deja tu comentario</h2>
+    </div>
+    <div className="px-4 py-2">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
+          <input
+            type="text"
+            placeholder="Aquí tu comentario"
+            className="p-2 border rounded-lg text-sm w-full sm:w-auto"
+          />
+          <button className="px-4 py-2 bg-gray-200 hover:bg-green-700 hover:text-white rounded-lg duration-500">
+            <i className="fa-solid fa-paper-plane"></i>
+          </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+                 {/* Modal */}
+                 {showModal && (
+  <div
+    className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+    onClick={handleCloseModal} // Cierra el modal al hacer clic en el fondo
+  >
+    <div
+      className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative"
+      onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal cierre el modal
+    >
+      <button
+        onClick={handleCloseModal}
+        className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
+        aria-label="Cerrar"
+      >
+        <i className="fa fa-times text-xl"></i>
+      </button>
+      
+      <h2 className="text-xl font-semibold mb-4">Reservas</h2>
+      <p className="mb-4">
+        Las reservas se gestionan exclusivamente a través de nuestro WhatsApp. Por favor, envíenos una captura de las fechas para confirmar su reserva, e indíquenos el paquete y la cabaña seleccionada.
+      </p>
+      
+      <a
+  href={`https://api.whatsapp.com/send?phone=51950280738&text=${encodeURIComponent(
+    `Hola, deseo reservar la cabaña "${cabin.name_cottage}".\n` +
+    `- Check-In: ${checkInDate ? checkInDate.toLocaleDateString() : "No especificado"}\n` +
+    `- Check-Out: ${checkOutDate ? checkOutDate.toLocaleDateString() : "No especificado"}\n` +
+    `- Paquete seleccionado: ${cabin.name}\n` +
+    `- Total a pagar: S/. ${calculateTotal().toFixed(2)}\n` +
+    `- Detalle de huéspedes:\n` +
+    `  * Adultos: ${guests.adults}\n` +   `  * Niños: ${guests.children}\n` +
+    `  * Bebés: ${guests.babies}\n` +
+    `Por favor, confirmen mi reserva. ¡Gracias!`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-4 w-full bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center"
+>
+        <i className="fab fa-whatsapp mr-2"></i> {/* Ícono de WhatsApp */}
+        Contactar por WhatsApp
+      </a>
+    </div>
+  </div>
+)}
+
       </div>
     </ColoredSection>
   );
