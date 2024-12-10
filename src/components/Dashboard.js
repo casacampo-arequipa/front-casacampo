@@ -9,6 +9,7 @@ import Torta from './atoms/dashboard/DougChartTorta';
 import FiveReservations from './atoms/dashboard/DougChartListR';
 import MoreUserReserva from './atoms/dashboard/DougChartUserHori';
 import CalendarReservet from './atoms/dashboard/DougChatCalendar';
+import Loader from './Loader';
 // Registrar los componentes de Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -128,7 +129,9 @@ const Dashboard = () => {
         setSelectedYear(event.target.value);
     };
 
-
+if (loading) {
+    return <Loader />
+}
 
     return (
         <>

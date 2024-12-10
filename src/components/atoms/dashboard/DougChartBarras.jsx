@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Chart from "react-apexcharts";
 import useFetch from '../../../useFetchAdmin';
+import Loader from '../../Loader';
 
 const Barras = () => {
     const { data, loading, error } = useFetch("dashboard");
@@ -121,6 +122,7 @@ const Barras = () => {
     const handleYearChangeGana = (event) => {
         setSelectedYearGana(event.target.value);
     };
+
     return (
         <>
             <div className='flex justify-between'>
@@ -138,9 +140,9 @@ const Barras = () => {
                 </select>
             </div>
             {!chartConfigData ? (
-                <div>Cargando...</div>  // Mostrar un mensaje de carga mientras se espera la configuración
+                <Loader />// Mostrar un mensaje de carga mientras se espera la configuración
             ) : (
-                <Chart options={chartConfigData} type="bar"  series={chartConfigData.series} height={400} width={570} />
+                <Chart options={chartConfigData} type="bar" series={chartConfigData.series} height={400} width={570} />
             )}
         </>
     );

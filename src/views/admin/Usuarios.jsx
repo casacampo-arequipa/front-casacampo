@@ -9,13 +9,14 @@ import axios from "axios";
 import { API_URL } from "../../env";
 import { token } from "../../helpers/auth";
 import Swal from "sweetalert2";
+import Loader from "../../components/Loader";
 
 const Usuarios = () => {
   const countries = getNames().map((country) => ({ value: country, label: country }));
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  const { data } = useFetch("users-admin")
+  const { data, loading } = useFetch("users-admin")
   const [openModal, setOpenModal] = useState(false);
   const [TypeUser, setTypeUser] = useState(2);
 
@@ -156,7 +157,9 @@ const Usuarios = () => {
       }
     }
   };
-
+  if (loading) {
+    return <Loader />
+  }
   return (
     <>
       <Card>
@@ -291,32 +294,36 @@ const Usuarios = () => {
                           onChange={(selectedOption) => setSelectedCountry(selectedOption)} // Captura el objeto completo
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Contraseña
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          required
-                          name="password"
-                          defaultValue={selectedUser?.password}
-                          placeholder="Mayor a 8 caracteres"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Confirmar contraseña
-                        </label>
-                        <input
-                          type="password"
-                          id="password_confirmation"
-                          required
-                          name="password_confirmation"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                      </div>
+                      {!selectedUser && (
+                        <>  <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Contraseña
+                          </label>
+                          <input
+                            type="password"
+                            id="password"
+                            required
+                            name="password"
+                            defaultValue={selectedUser?.password}
+                            placeholder="Mayor a 8 caracteres"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          />
+                        </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              Confirmar contraseña
+                            </label>
+                            <input
+                              type="password"
+                              id="password_confirmation"
+                              required
+                              name="password_confirmation"
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                          </div></>
+                      )}
+
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
                         <div className="flex space-x-4">

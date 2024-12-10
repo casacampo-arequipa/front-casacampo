@@ -6,6 +6,7 @@ import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
 import Swal from 'sweetalert2';
+import Loader from './Loader';
 
 const Reservas = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -277,7 +278,9 @@ const Reservas = () => {
       }
     }
   };
-
+  if (loading) {
+    return <Loader />
+  }
   return (
     <Card>
       <div className="flex justify-between items-center mb-4">

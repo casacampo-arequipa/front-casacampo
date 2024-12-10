@@ -40,15 +40,13 @@ function Navbar() {
 
   return (
     <nav
-      className={`${
-        isHomePage ? "fixed" : "relative"
-      } w-full px-4 py-3 top-0 z-50 transition-all duration-800 ${
-        isHomePage
+      className={`${isHomePage ? "fixed" : "relative"
+        } w-full px-4 py-3 top-0 z-50 transition-all duration-800 ${isHomePage
           ? scrollPosition > 0
             ? "bg-white/95 text-black shadow-lg rounded-b-xl border-b-2 border-b-red-800"
             : "bg-transparent text-white border-b-0 border-b-transparent"
           : "bg-white text-black shadow-lg rounded-b-xl border-b-2 border-b-red-800"
-      }`}
+        }`}
     >
       <div className="flex h-[4.4rem] md:items-center items-end justify-between w-full">
         {/* Botón de menú para móvil y logo */}
@@ -121,50 +119,46 @@ function Navbar() {
         <div className="absolute top-12 left-0 right-0 hidden sm:flex justify-center text-sm">
           <ul className="flex divide-x opacity-0 md:opacity-100 duration-300">
             <li
-              className={`cursor-pointer px-2 rounded ${
-                isHomePage
+              className={`cursor-pointer px-2 rounded ${isHomePage
                   ? scrollPosition > 0
                     ? "hover:bg-gray-200"
                     : "hover:bg-black/30"
                   : "hover:bg-gray-200"
-              }`}
+                }`}
             >
               <a href="/">{translations.inicio}</a>
             </li>
             <li
-              className={`cursor-pointer px-2 rounded ${
-                isHomePage
+              className={`cursor-pointer px-2 rounded ${isHomePage
                   ? scrollPosition > 0
                     ? "hover:bg-gray-200"
                     : "hover:bg-black/30"
                   : "hover:bg-gray-200"
-              }`}
+                }`}
             >
               <Link onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}>
                 {translations.nosotros}
               </Link>
             </li>
             <li
-              className={`cursor-pointer px-2 rounded ${
-                isHomePage
+              className={`cursor-pointer px-2 rounded ${isHomePage
                   ? scrollPosition > 0
                     ? "hover:bg-gray-200"
                     : "hover:bg-black/30"
                   : "hover:bg-gray-200"
-              }`}
+                }`}
             >
               <Link onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}>
                 {translations.contactanos}
               </Link>
             </li>
             <li
-              className={`cursor-pointer px-2 rounded ${
-                isHomePage
+              className={`cursor-pointer px-2 rounded ${isHomePage
                   ? scrollPosition > 0
                     ? "hover:bg-gray-200"
                     : "hover:bg-black/30"
                   : "hover:bg-gray-200"
-              }`}
+                }`}
             >
               <Link to="/galeria">{translations.galeria}</Link>
             </li>
@@ -183,9 +177,14 @@ function Navbar() {
                     <li className="px-4 py-2 text-sm">
                       Bienvenido, {userData.name}
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
-                      <Link to="/admin/dashboard">Admin</Link>
-                    </li>
+                    {
+                      userData.role === "Admin" && (
+                        <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
+                          <Link to="/admin/dashboard">Admin</Link>
+                        </li>
+                      )
+                    }
+
                     <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
                       <button
                         onClick={() => {

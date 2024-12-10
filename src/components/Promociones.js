@@ -1,16 +1,18 @@
 
 import React, { useState } from 'react';
 import { Card } from './Card';
-import useFetch from '../useFetch';
 import { Button, Modal } from 'flowbite-react';
 import { API_URL } from '../env';
 import axios from 'axios';
 import { token } from '../helpers/auth';
 import Swal from 'sweetalert2';
+import useFetch from '../useFetchAdmin';
+import Loader from './Loader';
 
 const Promociones = () => {
   const [openModal, setOpenModal] = useState(false);
-  const { data, loading, error } = useFetch("promotion");
+  const { data, loading, error } = useFetch("promotion-admin");
+  console.log(data)
   const [selectedPromo, setSelectedPromo] = useState();
   const [dateStart, setDateStart] = useState('');
   const [dateEnd, setDateEnd] = useState('');
@@ -52,7 +54,7 @@ const Promociones = () => {
     if (selectedPromo) {
       try {
         await axios.put(
-          `${API_URL}/promotion/${selectedPromo.id}`,
+          `${API_URL}/promotion-admin/${selectedPromo.id}`,
           data,
           {
             headers: {
@@ -78,7 +80,7 @@ const Promociones = () => {
     } else {
       try {
         await axios.post(
-          `${API_URL}/promotion`,
+          `${API_URL}/promotion-admin`,
           data,
           {
             headers: {
@@ -121,7 +123,7 @@ const Promociones = () => {
     if (result.isConfirmed) {
       try {
         await axios.delete(
-          `${API_URL}/promotion/${id}`,
+          `${API_URL}/promotion-admin/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token()}`, // Añade el token al header
@@ -150,6 +152,10 @@ const Promociones = () => {
       }
     }
   };
+  if (loading) {
+    return <Loader />
+  }
+
   return (
     <Card>
       <div className="flex justify-between items-center mb-4">
@@ -180,30 +186,44 @@ const Promociones = () => {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {data?.promotions.map((cottage, index) => (
-              <tr key={index} className="hover:bg-gray-100">
-                <td className="p-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  {index + 1}
-                </td>
-                <td className="p-3">{cottage.name_promotion}</td>
-                <td className="p-3">{cottage.percentage} %</td>
-                <td className="p-3"> {new Date(cottage?.date_start).toISOString().split('T')[0]}</td>
-                <td className="p-3"> {new Date(cottage?.date_end).toISOString().split('T')[0]}</td>
-                <td className="p-3"> <span style={{ color: cottage?.state === 1 ? 'green' : 'red' }}>
-                  {cottage?.state === 1 ? 'Activo' : 'Desactivado'}
-                </span></td>
-                <td className="p-2">
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEditClick(cottage)} className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700">
-                      <i className="fa-solid fa-pen "></i>
-                    </button>
-                    <button onClick={() => handledeleteClick(cottage.id)} className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700">
-                      <i className="fa-solid fa-trash "></i>
-                    </button>
-                  </div>
+            {!data || data?.promotions.length === 0 ? (
+              <tr className="hover:bg-gray-100">
+                <td colSpan="7" className="flex items-center justify-center text-2xl text-center py-4">
+                  Sin datos
                 </td>
               </tr>
-            ))}
+            ) : (
+              data?.promotions.map((cottage, index) => (
+                <tr key={index} className="hover:bg-gray-100">
+                  <td className="p-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                    {index + 1}
+                  </td>
+                  <td className="p-3">{cottage.name_promotion}</td>
+                  <td className="p-3">{cottage.percentage} %</td>
+                  <td className="p-3">
+                    {new Date(cottage?.date_start).toISOString().split('T')[0]}
+                  </td>
+                  <td className="p-3">
+                    {new Date(cottage?.date_end).toISOString().split('T')[0]}
+                  </td>
+                  <td className="p-3">
+                    <span style={{ color: cottage?.state === 1 ? 'green' : 'red' }}>
+                      {cottage?.state === 1 ? 'Activo' : 'Desactivado'}
+                    </span>
+                  </td>
+                  <td className="p-2">
+                    <div className="flex gap-2">
+                      <button onClick={() => handleEditClick(cottage)} className="px-3 py-2 rounded-lg text-white bg-green-500 hover:bg-green-700">
+                        <i className="fa-solid fa-pen "></i>
+                      </button>
+                      <button onClick={() => handledeleteClick(cottage.id)} className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-700">
+                        <i className="fa-solid fa-trash "></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
 
           </tbody>
         </table>

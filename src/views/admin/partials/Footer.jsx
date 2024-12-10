@@ -12,9 +12,9 @@ export default function Footer() {
               2023 -
               <script>
                 document.write(new Date().getFullYear())
-              </script>, made by <a href="###"
+              </script>, Desarrollado por <a href="###"
                 target="_blank"
-                class="footer-link fw-medium">Dynamus Developer Team</a>
+                class="footer-link fw-medium">Mani Code</a>
             </div>
           </div>
         </div>

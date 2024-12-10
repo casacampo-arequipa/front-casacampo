@@ -27,6 +27,8 @@ import Galeria from "./components/Galeria"; // Importa el componente Galeria
 import { HashRouter as Router } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext";
 import Dashboard from "./components/Dashboard";
+import ProtectedAdminRoute from "./components/routes/ProtectedAdminRoute";
+import Error404 from "./pages/Error404";
 
 
 
@@ -34,14 +36,14 @@ import Dashboard from "./components/Dashboard";
 function Layout({ children }) {
   const location = useLocation();
   const isDashboard = location.pathname.startsWith("/admin");
-
+  const isAccessDenied = location.pathname === "/access-denied";
   return (
     <>
       {/* Solo mostrar Navbar y Footer fuera de las rutas del dashboard */}
-      {!isDashboard && <Navbar />}
-      {!isDashboard && <Whasap />}
+      {!isDashboard && !isAccessDenied && <Navbar />}
+      {!isDashboard && !isAccessDenied && <Whasap />}
       {children}
-      {!isDashboard && <Footer />}
+      {!isDashboard && !isAccessDenied && <Footer />}
     </>
   );
 }
@@ -61,6 +63,7 @@ function App() {
   return (
     <UserProvider>
       <LanguageProvider>
+
         <Router>
           <div className="App">
             {loading && <Loader />} {/* Muestra el cargador si está cargando */}
@@ -77,7 +80,6 @@ function App() {
                     </>
                   }
                 />
-
                 <Route
                   path="/cabin-detail"
                   element={
@@ -99,17 +101,39 @@ function App() {
                     </>
                   }
                 />
-
+                
                 {/* Dashboard con Sidebar persistente */}
                 <Route path="/admin" element={<DashboardLayout />}>
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="usuarios" element={<Usuarios />} />
-                  <Route path="cabanas" element={<Cabanas />} />
-                  <Route path="promociones" element={<Promociones />} />
-                  <Route path="descuentos" element={<Descuentos />} />
-                  <Route path="paquetes" element={<Package />} />
-                  <Route path="reservas" element={<Reservas />} />
+                  <Route
+                    path="dashboard"
+                    element={<ProtectedAdminRoute element={<Dashboard />} />}
+                  />
+                  <Route
+                    path="usuarios"
+                    element={<ProtectedAdminRoute element={<Usuarios />} />}
+                  />
+                  <Route
+                    path="cabanas"
+                    element={<ProtectedAdminRoute element={<Cabanas />} />}
+                  />
+                  <Route
+                    path="promociones"
+                    element={<ProtectedAdminRoute element={<Promociones />} />}
+                  />
+                  <Route
+                    path="descuentos"
+                    element={<ProtectedAdminRoute element={<Descuentos />} />}
+                  />
+                  <Route
+                    path="paquetes"
+                    element={<ProtectedAdminRoute element={<Package />} />}
+                  />
+                  <Route
+                    path="reservas"
+                    element={<ProtectedAdminRoute element={<Reservas />} />}
+                  />
                 </Route>
+                <Route path="/access-denied" element={<Error404 />} />
               </Routes>
             </Layout>
           </div>

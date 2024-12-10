@@ -8,6 +8,7 @@ import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
 import Swal from 'sweetalert2';
+import Loader from './Loader';
 
 const Package = () => {
     const { data, loading, error } = useFetch("packages-admin");
@@ -153,7 +154,9 @@ const Package = () => {
             }
         }
     };
-
+    if (loading) {
+        return <Loader />
+    }
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">

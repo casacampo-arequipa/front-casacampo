@@ -15,6 +15,7 @@ import { FaUsers, FaMoneyBillWave } from "react-icons/fa";
 
 export default function Inicio() {
   const { data } = useFetch("packages");
+  console.log(data)
   const { translations, setCurrentView } = useContext(LanguageContext);
   const location = useLocation();
   const [openModal, setOpenModal] = useState(false);

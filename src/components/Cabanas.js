@@ -8,6 +8,7 @@ import axios from 'axios';
 import { API_URL } from '../env';
 import { token } from '../helpers/auth';
 import Swal from 'sweetalert2';
+import Loader from './Loader';
 
 const Cabanas = () => {
   const [isTableView, setIsTableView] = useState(true);
@@ -69,7 +70,7 @@ const Cabanas = () => {
           }
         });
         setOpenModal(false);
-        
+
       } catch (error) {
         console.error("Error al guardar los datos:", error);
         alert("Hubo un error al guardar los datos");
@@ -160,9 +161,12 @@ const Cabanas = () => {
       }
     }
   };
-
+  if (loading) {
+    return <Loader />
+  }
 
   return (
+
     <Card>
       <div className="flex justify-between items-center mb-4">
         <input
