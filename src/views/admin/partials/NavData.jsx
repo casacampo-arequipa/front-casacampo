@@ -5,7 +5,7 @@ const NavData = [
   { title: "Usuarios", rute: "usuarios", icon: "fa-solid fa-users" },
   { title: "Reservas", rute: "reservas", icon: "fa-regular fa-calendar-days" },
   { title: "Promociones", rute: "promociones", icon: "fa-solid fa-tags" },
-  // { title: "Descuentos", rute: "descuentos", icon: "fa-solid fa-percent" },
+  { title: "Comentarios", rute: "comments", icon: "fa-solid fa-comment" },
 
 ];
 
