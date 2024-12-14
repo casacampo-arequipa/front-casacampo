@@ -276,62 +276,62 @@ function Navbar() {
         }`}
     >
       <div className="flex h-[4.4rem] md:items-center items-end justify-between w-full">
-          {/* Botón de menú para móvil y logo */}
-          <div className="flex items-center gap-2 sm:gap-4 relative">
-  {/* Ícono de menú en vista móvil */}
-  <FaBars
-    className="text-2xl cursor-pointer sm:hidden"
-    onClick={toggleMobileMenu}
-  />
+        {/* Botón de menú para móvil y logo */}
+        <div className="flex items-center gap-2 sm:gap-4 relative">
+          {/* Ícono de menú en vista móvil */}
+          <FaBars
+            className="text-2xl cursor-pointer sm:hidden"
+            onClick={toggleMobileMenu}
+          />
 
-  {/* Efecto de nieve */}
-  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-    {Array.from({ length: 50 }).map((_, index) => (
-      <div
-        key={index}
-        className="absolute w-1 h-1 bg-white rounded-full animate-snow"
-        style={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 3}s`,
-          animationDuration: `${2 + Math.random() * 3}s`,
-        }}
-      ></div>
-    ))}
-  </div>
+          {/* Efecto de nieve */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {Array.from({ length: 50 }).map((_, index) => (
+              <div
+                key={index}
+                className="absolute w-1 h-1 bg-white rounded-full animate-snow"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 3}s`,
+                }}
+              ></div>
+            ))}
+          </div>
 
-  {/* Logo */}
-  <a href="/" className="relative z-10">
-    <img
-      className="h-auto w-14 sm:w-24"
-      src="/images/logo-arequipa-remove.png"
-      alt="Logo"
-    />
-    {/* Gorro navideño */}
-    <img
-      className="absolute -top-3 -right-0 w-8 sm:-top-3 sm:right-3 sm:w-10"
-      src="/images/gorro-navidad.png"
-      alt="Gorro Navideño"
-    />
-  </a>
+          {/* Logo */}
+          <a href="/" className="relative z-10">
+            <img
+              className="h-auto w-14 sm:w-24"
+              src="/images/logo-arequipa-remove.png"
+              alt="Logo"
+            />
+            {/* Gorro navideño */}
+            <img
+              className="absolute -top-3 -right-0 w-8 sm:-top-3 sm:right-3 sm:w-10"
+              src="/images/gorro-navidad.png"
+              alt="Gorro Navideño"
+            />
+          </a>
 
-  {/* Texto "Casa Campo Arequipa" oculto en vista móvil */}
-  <div className="hidden sm:block cursor-pointer pt-1 z-10">
-    <Link to="/">
-      <h1 className="text-base sm:text-2xl font-bold text-red-700 flex items-center">
-        Casa Campo
-        <span className="ml-2 text-blue-500 text-sm sm:text-lg animate-pulse">
-          ❄️
-        </span>
-      </h1>
-    </Link>
-    <div className="text-xs sm:text-lg font-semibold -mt-1 text-green-700">
-      Arequipa
-    </div>
-  </div>
+          {/* Texto "Casa Campo Arequipa" oculto en vista móvil */}
+          <div className="hidden sm:block cursor-pointer pt-1 z-10">
+            <Link to="/">
+              <h1 className="text-base sm:text-2xl font-bold text-red-700 flex items-center">
+                Casa Campo
+                <span className="ml-2 text-blue-500 text-sm sm:text-lg animate-pulse">
+                  ❄️
+                </span>
+              </h1>
+            </Link>
+            <div className="text-xs sm:text-lg font-semibold -mt-1 text-green-700">
+              Arequipa
+            </div>
+          </div>
 
-  {/* Luces navideñas (puedes añadirlas aquí si decides incluirlas después) */}
-</div>
+          {/* Luces navideñas (puedes añadirlas aquí si decides incluirlas después) */}
+        </div>
 
         {/* Menú desplegable en móvil */}
         {isMobileMenuOpen && (
@@ -378,20 +378,20 @@ function Navbar() {
           <ul className="flex divide-x opacity-0 md:opacity-100 duration-300">
             <li
               className={`cursor-pointer px-2 rounded ${isHomePage
-                  ? scrollPosition > 0
-                    ? "hover:bg-gray-200"
-                    : "hover:bg-black/30"
-                  : "hover:bg-gray-200"
+                ? scrollPosition > 0
+                  ? "hover:bg-gray-200"
+                  : "hover:bg-black/30"
+                : "hover:bg-gray-200"
                 }`}
             >
               <a href="/">{translations.inicio}</a>
             </li>
             <li
               className={`cursor-pointer px-2 rounded ${isHomePage
-                  ? scrollPosition > 0
-                    ? "hover:bg-gray-200"
-                    : "hover:bg-black/30"
-                  : "hover:bg-gray-200"
+                ? scrollPosition > 0
+                  ? "hover:bg-gray-200"
+                  : "hover:bg-black/30"
+                : "hover:bg-gray-200"
                 }`}
             >
               <Link onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}>
@@ -400,10 +400,10 @@ function Navbar() {
             </li>
             <li
               className={`cursor-pointer px-2 rounded ${isHomePage
-                  ? scrollPosition > 0
-                    ? "hover:bg-gray-200"
-                    : "hover:bg-black/30"
-                  : "hover:bg-gray-200"
+                ? scrollPosition > 0
+                  ? "hover:bg-gray-200"
+                  : "hover:bg-black/30"
+                : "hover:bg-gray-200"
                 }`}
             >
               <Link onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}>
@@ -412,10 +412,10 @@ function Navbar() {
             </li>
             <li
               className={`cursor-pointer px-2 rounded ${isHomePage
-                  ? scrollPosition > 0
-                    ? "hover:bg-gray-200"
-                    : "hover:bg-black/30"
-                  : "hover:bg-gray-200"
+                ? scrollPosition > 0
+                  ? "hover:bg-gray-200"
+                  : "hover:bg-black/30"
+                : "hover:bg-gray-200"
                 }`}
             >
               <Link to="/galeria">{translations.galeria}</Link>
@@ -438,11 +438,13 @@ function Navbar() {
                     {
                       userData.role === "Admin" && (
                         <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
-                          <Link to="/admin/dashboard">Admin</Link>
+                          <Link to="/admin/dashboard">Adminstración</Link>
                         </li>
                       )
                     }
-
+                    <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
+                      <Link to="/my-profile">Mi perfil</Link>
+                    </li>
                     <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm">
                       <button
                         onClick={() => {

@@ -29,6 +29,7 @@ import { UserProvider } from "./contexts/UserContext";
 import Dashboard from "./components/Dashboard";
 import ProtectedAdminRoute from "./components/routes/ProtectedAdminRoute";
 import Error404 from "./pages/Error404";
+import MyProfile from "./components/Myprofile";
 
 
 
@@ -89,6 +90,15 @@ function App() {
                     </>
                   }
                 />
+                <Route
+                  path="/my-profile"
+                  element={
+                    <>
+                      <MyProfile />
+                      <SocialMediaIcons />
+                    </>
+                  }
+                />
                 <Route path="/pago" element={<PaymentPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -101,7 +111,7 @@ function App() {
                     </>
                   }
                 />
-                
+
                 {/* Dashboard con Sidebar persistente */}
                 <Route path="/admin" element={<DashboardLayout />}>
                   <Route

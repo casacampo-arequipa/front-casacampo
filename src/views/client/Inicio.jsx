@@ -99,7 +99,7 @@ export default function Inicio() {
       title: translations.fogata_title,
       description: translations.fogata_description,
     },
-    
+
     {
       img: "/icons/estacionamiento.png",
       title: translations.estacionamiento_title,
@@ -130,7 +130,7 @@ export default function Inicio() {
       title: translations.sapo_title,
       description: translations.sapo_description,
     },
-    
+
   ];
 
   const handleServiceModalOpen = () => setShowServiceModal(true); // Función para abrir modal
@@ -178,7 +178,7 @@ export default function Inicio() {
     setSelectedPackage(service); // Guarda el paquete seleccionado
     setOpenModal(true); // Abre el modal
   };
-  
+
   return (
     <>
       <WelcomeSection />
@@ -198,28 +198,28 @@ export default function Inicio() {
               <div className="w-full h-auto flex flex-wrap justify-center lg:gap-7 sm:gap-10 gap-7 px-8 sm:px-0 mt-4">
                 {data?.packeges.map((service, index) => (
                   <CardInicio
-                  onClick={() => handlePackageClick(service)}
-                  data-aos="flip-up"
-                  key={index}
-                  cardClass="relative group w-64 bg-white flex flex-col items-center justify-center gap-3 p-4 cursor-pointer transition duration-500 hover:shadow-xl rounded-xl border hover:border-green-600 overflow-hidden"
-                  textWrapperClass="w-full flex flex-col items-center gap-2"
-                >
-                  <h4 className="text-lg font-bold">{service.name}</h4>
-                  <div className="relative w-40 h-40 overflow-hidden rounded-lg">
-                    <img
-                      src={service.img}
-                      alt={service.name}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center text-center text-white opacity-0 group-hover:opacity-100 transition duration-500 p-4">
+                    onClick={() => handlePackageClick(service)}
+                    data-aos="flip-up"
+                    key={index}
+                    cardClass="relative group w-64 bg-white flex flex-col items-center justify-center gap-3 p-4 cursor-pointer transition duration-500 hover:shadow-xl rounded-xl border hover:border-green-600 overflow-hidden"
+                    textWrapperClass="w-full flex flex-col items-center gap-2"
+                  >
                     <h4 className="text-lg font-bold">{service.name}</h4>
-                    <p className="text-sm">Ingreso para {service.max_person} personas Maximo  </p>
-                    <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday} / noche</p>
-                    <p className="text-sm">Precio (Viernes y Domingo): S/.{service.price_friday_to_sunday} / noche</p>
-                    <p className="text-sm">"NO INCLUYE FERIADOS NI FECHAS ESPECIALES"</p>
-                  </div>
-                </CardInicio>
+                    <div className="relative w-40 h-40 overflow-hidden rounded-lg">
+                      <img
+                        src={service.img}
+                        alt={service.name}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center text-center text-white opacity-0 group-hover:opacity-100 transition duration-500 p-4">
+                      <h4 className="text-lg font-bold">{service.name}</h4>
+                      <p className="text-sm">Ingreso para {service.max_person} personas Maximo  </p>
+                      <p className="text-sm">Precio (Lunes a Jueves): S/.{service.price_monday_to_thursday} / noche</p>
+                      <p className="text-sm">Precio (Viernes y Domingo): S/.{service.price_friday_to_sunday} / noche</p>
+                      <p className="text-sm">"NO INCLUYE FERIADOS NI FECHAS ESPECIALES"</p>
+                    </div>
+                  </CardInicio>
                 ))}
               </div>
               <Modal size="4xl" show={openModal} onClose={() => setOpenModal(false)}>
@@ -233,9 +233,8 @@ export default function Inicio() {
                           {selectedPackage.name}
                         </h3>
                         <p
-                          className={`text-gray-700 mb-4 ${
-                            showFullDescription ? "" : "line-clamp-3"
-                          }`}
+                          className={`text-gray-700 mb-4 ${showFullDescription ? "" : "line-clamp-3"
+                            }`}
                         >
                           {selectedPackage.description}
                         </p>
@@ -265,7 +264,7 @@ export default function Inicio() {
                       </div>
 
                       {/* Componente CabinCards que muestra las cabañas */}
-                      <CabinCards  description={selectedPackage.description} name={selectedPackage.name} max_person={selectedPackage.max_person} packageId={selectedPackage.id} />
+                      <CabinCards description={selectedPackage.description} name={selectedPackage.name} max_person={selectedPackage.max_person} packageId={selectedPackage.id} />
                     </div>
                   )}
                 </Modal.Body>
@@ -280,7 +279,7 @@ export default function Inicio() {
           </section>
         </ColoredSection>
       </div>
-
+      
       <div className="bg-red-800 pilares">
         <div className="max-w-[1180px] w-full mx-auto">
           <div className="py-12 px-4">
@@ -385,11 +384,11 @@ export default function Inicio() {
                   {translations.nuestra_oferta}
                 </div>
                 <h1>
-                <div className="text-2xl font-extrabold">
-                  {translations.explora_casa_campo_arequipa}
-                </div>
+                  <div className="text-2xl font-extrabold">
+                    {translations.explora_casa_campo_arequipa}
+                  </div>
                 </h1>
-                
+
               </div>
 
               <p data-aos="fade-left">
