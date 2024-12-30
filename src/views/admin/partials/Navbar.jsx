@@ -2,9 +2,13 @@
 import React, { useEffect, useState } from "react";
 
 import { Dropdown } from "flowbite-react";
+import { clearlocal } from "../../../helpers/auth";
+import { useNavigate } from "react-router-dom";
+import Loader from "../../../components/Loader";
 
 export default function Navbar({ setIsOpen }) {
-
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [hour, setHour] = useState(new Date().getHours());
   const [greeting, setGreeting] = useState("");
 
@@ -17,7 +21,19 @@ export default function Navbar({ setIsOpen }) {
       setGreeting("Buenas noches 👋!");
     }
   }, [hour]);
+  const handleLogout = () => {
+    setLoading(true); // Muestra el loader
 
+    // Simula un retraso de 2 segundos antes de limpiar y redirigir
+    setTimeout(() => {
+      clearlocal(); // Limpia el localStorage
+      setLoading(false); // Oculta el loader
+      navigate("/"); // Redirige al inicio
+    }, 1000);
+  };
+  if (loading) {
+    return <Loader />
+  }
   return (
     <>
       <div className="sticky z-10 top-0 flex items-center w-full text-sm px-4 py-2">
@@ -47,10 +63,12 @@ export default function Navbar({ setIsOpen }) {
             <div className="sm:flex sm:items-center">
               <div className="">
                 <Dropdown label="Administrador" style={{ backgroundColor: 'gray' }}>
-                  <Dropdown.Item>Dashboard</Dropdown.Item>
-                  <Dropdown.Item>Cuenta</Dropdown.Item>
+                  <Dropdown.Item onClick={() => navigate("/admin/dashboard")}>
+                    Dashboard
+                  </Dropdown.Item>
+                  {/* <Dropdown.Item>Cuenta</Dropdown.Item> */}
                   <Dropdown.Divider />
-                  <Dropdown.Item>Cerrar sesión</Dropdown.Item>
+                  <Dropdown.Item onClick={handleLogout}>Cerrar sesión</Dropdown.Item>
                 </Dropdown>
 
               </div>

@@ -30,6 +30,7 @@ import Dashboard from "./components/Dashboard";
 import ProtectedAdminRoute from "./components/routes/ProtectedAdminRoute";
 import Error404 from "./pages/Error404";
 import MyProfile from "./components/Myprofile";
+import Comments from "./components/Comments";
 
 
 
@@ -141,6 +142,10 @@ function App() {
                   <Route
                     path="reservas"
                     element={<ProtectedAdminRoute element={<Reservas />} />}
+                  />
+                  <Route
+                    path="comments"
+                    element={<ProtectedAdminRoute element={<Comments />} />}
                   />
                 </Route>
                 <Route path="/access-denied" element={<Error404 />} />

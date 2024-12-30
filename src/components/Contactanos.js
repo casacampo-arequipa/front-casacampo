@@ -2,22 +2,59 @@ import React, { useState, useEffect, useContext } from "react";
 import { CreateUpdate } from "./FormContactanos";
 import ColoredSection from "./Section/ColoredSection";
 import { LanguageContext } from "./LanguageContext";
+import useFetch from "../useFetch";
+import { API_URL } from "../env";
+import axios from "axios";
+import Swal from "sweetalert2";
 // import { createMensaje } from "../../services/MensajeService";
 
 export default function Contactanos() {
-  let dataMensaje = {
-    id: null,
-    nombre: "",
-    correo: "",
-    mensaje: "",
-    telefono: "",
-    asunto: "",
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
+  let dataMensaje = {
+    nombre: '',
+    telefono: '',
+    correo: '',
+    asunto: '',
+    mensaje: '',
+  };
   const [mensaje, setMensaje] = useState(dataMensaje);
   const [submitted, setSubmitted] = useState(false);
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    let dataMensaje = {
+      name: mensaje.nombre,
+      phone: mensaje.telefono,
+      email: mensaje.correo,
+      case: mensaje.asunto,
+      message: mensaje.mensaje,
+    };
+    try {
+      await axios.post(`${API_URL}/contact`, dataMensaje);
+      Swal.fire({
+        title: "¡Buen trabajo!",
+        text: "Tu mensaje ha sido enviado exitosamente.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      }).then(() => {
+        setMensaje({ nombre: "", telefono: "", email: "", asunto: "", mensaje: "" });
+      });
+    } catch (error) {
+      console.log(error)
+      console.log("hola")
+      Swal.fire({
+        title: "Error",
+        text: "Hubo un problema al enviar el mensaje.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    } finally {
+      setIsLoading(false); // Habilita el botón
+    }
+  };
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   const saveUpdate = () => {
     setSubmitted(true);
@@ -179,11 +216,22 @@ export default function Contactanos() {
             />
             <div className="flex items-center justify-center h-12">
               <button
-                onClick={saveUpdate}
-                className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 flex items-center"
+                onClick={handleSave}
+                disabled={isLoading} // Deshabilita el botón si isLoading es true
+                className={`bg-indigo-600 text-white py-2 px-4 rounded-lg flex items-center ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-700"
+                  }`}
               >
-                <i className="pi pi-send mr-2"></i> {translations.enviar}
+                {isLoading ? (
+                  <>
+                    <i className="pi pi-spin pi-spinner mr-2"></i> Enviando...
+                  </>
+                ) : (
+                  <>
+                    <i className="pi pi-send mr-2"></i> {translations.enviar}
+                  </>
+                )}
               </button>
+
             </div>
           </div>
         </div>
