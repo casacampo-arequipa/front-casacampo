@@ -38,7 +38,7 @@ export default function Contactanos() {
         icon: "success",
         confirmButtonText: "Aceptar",
       }).then(() => {
-        setMensaje({ nombre: "", telefono: "", email: "", asunto: "", mensaje: "" });
+        setMensaje({ nombre: "", telefono: "", correo: "", asunto: "", mensaje: "" });
       });
     } catch (error) {
       console.log(error)
@@ -134,7 +134,7 @@ export default function Contactanos() {
               ismensaje={true}
               onHide={hideDialog}
               htmlFor_00="nombre"
-              label_00={translations.nombre}
+              label_00={translations.nombre + " " + "Completo" }
               id_00="nombre"
               value_00={mensaje.nombre}
               onChange_00={(e) => onInputChange(e, "nombre")}

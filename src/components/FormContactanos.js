@@ -46,7 +46,7 @@ export const CreateUpdate = (props) => {
         backgroundColor: "white",
       }}
     >
-      <div className="grid gap-4 p-4 lg:max-w-[450px] max-w-[400px] m-auto sm:min-w-72">
+      <div className="grid gap-4 lg:max-w-[450px] max-w-[400px] m-auto sm:min-w-72">
         <div className="w-full lg:col-span-6 col-span-12">
           <div className="grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="w-full lg:col-span-1">
