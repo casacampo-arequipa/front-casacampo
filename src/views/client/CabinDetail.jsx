@@ -296,6 +296,7 @@ const CabinDetail = ({ max_person, }) => {
           title: "Opinon Enviada"
         });
       } catch (error) {
+        console.log(error)
         const Toast = Swal.mixin({
           toast: true,
           position: "top-end",
@@ -309,7 +310,7 @@ const CabinDetail = ({ max_person, }) => {
         });
         Toast.fire({
           icon: "error",
-          title: "Opinon Enviada"
+          title: "Ocurrio un imprevisto"
         });
       }
     } else {
